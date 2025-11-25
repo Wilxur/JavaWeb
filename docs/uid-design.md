@@ -1,0 +1,3 @@
+# UID 设计（UID Design）
+
+跨站匿名 UID 机制说明……
