@@ -1,3 +1,0 @@
-# 数据库结构（Database Schema）
-
-ER 图与数据表结构说明……

@@ -1,3 +1,0 @@
-# 分类标准（Category Standard）
-
-此文档定义全站统一分类……
