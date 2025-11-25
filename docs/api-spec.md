@@ -1,3 +1,0 @@
-# API 约定文档（API Specification）
-
-此文档描述广告系统 API……
