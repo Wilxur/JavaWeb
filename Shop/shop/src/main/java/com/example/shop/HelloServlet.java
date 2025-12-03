@@ -1,6 +1,7 @@
-package com.example.shopp;
+package com.example.shop;
 
 import java.io.*;
+
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
