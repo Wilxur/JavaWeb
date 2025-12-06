@@ -28,10 +28,11 @@ public class DBUtil {
             props.load(is);
             is.close();
 
-            driver = props.getProperty("db.driver");
-            url = props.getProperty("db.url");
-            username = props.getProperty("db.username");
-            password = props.getProperty("db.password");
+            // ✅ 这里改成 jdbc.xxx
+            driver = props.getProperty("jdbc.driver");
+            url = props.getProperty("jdbc.url");
+            username = props.getProperty("jdbc.username");
+            password = props.getProperty("jdbc.password");
 
             Class.forName(driver);
             System.out.println("✅ 数据库驱动加载成功！");
