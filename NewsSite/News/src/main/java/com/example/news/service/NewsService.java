@@ -82,3 +82,13 @@ public class NewsService {
         newsDao.incrementViewCount(newsId);
     }
 }
+
+
+public boolean incrementViewCount(int newsId) {
+    try {
+        return newsDao.incrementViewCount(newsId);
+    } catch (Exception e) {
+        System.err.println("增加浏览量失败: " + e.getMessage());
+        return false;
+    }
+}

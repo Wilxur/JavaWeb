@@ -64,3 +64,26 @@ public class NewsDao {
         return n;
     }
 }
+
+public boolean incrementViewCount(int newsId) {
+    String sql = "UPDATE news SET view_count = view_count + 1 WHERE news_id = ?";
+
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+
+    try {
+        conn = DBUtil.getConnection();
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, newsId);
+
+        int rows = pstmt.executeUpdate();
+        return rows > 0;
+
+    } catch (SQLException e) {
+        System.err.println("增加浏览量失败: " + e.getMessage());
+        e.printStackTrace();
+        return false;
+    } finally {
+        DBUtil.close(pstmt, conn);
+    }
+}
