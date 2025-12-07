@@ -20,7 +20,7 @@ public class DBUtil {
             password = props.getProperty("db.password");
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("数据库配置加载失败", e);
         }
     }
 
