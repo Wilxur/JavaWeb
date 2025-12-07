@@ -15,7 +15,7 @@ public class NewsDao {
     // 查询所有新闻
     public List<News> findAll() {
         List<News> list = new ArrayList<>();
-        String sql = "SELECT * FROM news ORDER BY published_at DESC";
+        String sql = "SELECT * FROM news ORDER BY publish_time DESC";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -39,7 +39,7 @@ public class NewsDao {
 
     // 根据ID查询新闻
     public News findById(int id) {
-        String sql = "SELECT * FROM news WHERE news_id=?";
+        String sql = "SELECT * FROM news WHERE id=?";
         News n = null;
 
         try (Connection conn = DBUtil.getConnection();

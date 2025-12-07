@@ -5,20 +5,17 @@ import java.sql.Timestamp;
 
 /**
  * 新闻分类实体类
- * 对应数据库表：category
  */
 public class Category implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer categoryId;      // 分类ID
-    private String categoryName;     // 分类名称
-    private String description;      // 分类描述
-    private Timestamp createdAt;     // 创建时间
+    private Integer categoryId;
+    private String categoryName;
+    private String description;
+    private Timestamp createdAt;
 
-    // 无参构造方法（必须有）
     public Category() {}
 
-    // 全参构造方法（方便创建对象）
     public Category(Integer categoryId, String categoryName, String description, Timestamp createdAt) {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
@@ -26,7 +23,7 @@ public class Category implements Serializable {
         this.createdAt = createdAt;
     }
 
-    // Getter 和 Setter 方法
+    // Getter 和 Setter
     public Integer getCategoryId() {
         return categoryId;
     }
@@ -59,14 +56,12 @@ public class Category implements Serializable {
         this.createdAt = createdAt;
     }
 
-    // toString 方法（方便调试）
     @Override
     public String toString() {
         return "Category{" +
                 "categoryId=" + categoryId +
                 ", categoryName='" + categoryName + '\'' +
                 ", description='" + description + '\'' +
-                ", createdAt=" + createdAt +
                 '}';
     }
 }

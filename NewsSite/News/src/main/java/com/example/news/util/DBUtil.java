@@ -4,36 +4,89 @@ import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
 
+/**
+ * 数据库连接工具类（纯手写 JDBC）
+ */
 public class DBUtil {
+
+    private static String driver;
     private static String url;
     private static String username;
     private static String password;
-    private static String driver;
 
+    // 静态代码块：加载配置文件
     static {
         try {
-            Properties prop = new Properties();
-            InputStream in = DBUtil.class.getClassLoader().getResourceAsStream("db.properties");
-            prop.load(in);
+            Properties props = new Properties();
+            InputStream is = DBUtil.class.getClassLoader()
+                    .getResourceAsStream("db.properties");
 
-            url = prop.getProperty("jdbc.url");
-            username = prop.getProperty("jdbc.username");
-            password = prop.getProperty("jdbc.password");
-            driver = prop.getProperty("jdbc.driver");
+            if (is == null) {
+                throw new RuntimeException("找不到 db.properties 配置文件！");
+            }
+
+            props.load(is);
+            is.close();
+
+            // ✅ 这里改成 jdbc.xxx
+            driver = props.getProperty("jdbc.driver");
+            url = props.getProperty("jdbc.url");
+            username = props.getProperty("jdbc.username");
+            password = props.getProperty("jdbc.password");
 
             Class.forName(driver);
+            System.out.println("✅ 数据库驱动加载成功！");
+
         } catch (Exception e) {
+            System.err.println("❌ 数据库配置加载失败：" + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("数据库初始化失败", e);
+        }
+    }
+
+    /**
+     * 获取数据库连接
+     */
+    public static Connection getConnection() {
+        try {
+            return DriverManager.getConnection(url, username, password);
+        } catch (SQLException e) {
+            System.err.println("❌ 数据库连接失败：" + e.getMessage());
+            throw new RuntimeException("获取数据库连接失败", e);
+        }
+    }
+
+    /**
+     * 关闭资源
+     */
+    public static void close(Connection conn, PreparedStatement ps, ResultSet rs) {
+        try {
+            if (rs != null) rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (ps != null) ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (conn != null) conn.close();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static Connection getConnection() throws Exception {
-        return DriverManager.getConnection(url, username, password);
+    public static void close(Connection conn, PreparedStatement ps) {
+        close(conn, ps, null);
     }
 
-    public static void close(ResultSet rs, Statement stmt, Connection conn) {
-        try { if (rs != null) rs.close(); } catch (Exception ignored) {}
-        try { if (stmt != null) stmt.close(); } catch (Exception ignored) {}
-        try { if (conn != null) conn.close(); } catch (Exception ignored) {}
+    // 测试方法
+    public static void main(String[] args) {
+        Connection conn = getConnection();
+        if (conn != null) {
+            System.out.println("🎉 数据库连接测试成功！");
+            close(conn, null);
+        }
     }
 }
