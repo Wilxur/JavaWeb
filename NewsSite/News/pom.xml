@@ -3,6 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
@@ -13,21 +14,28 @@
     <name>NewsSite</name>
     <description>新闻网站 - 匿名用户精准广告投放系统</description>
 
+    <!-- ======================= -->
+    <!-- 编译配置 -->
+    <!-- ======================= -->
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!-- ======================= -->
+    <!-- 依赖管理 -->
+    <!-- ======================= -->
     <dependencies>
-        <!-- MySQL 驱动 -->
+
+        <!-- MySQL 驱动（8.x） -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
 
-        <!-- Servlet API (Tomcat 10) -->
+        <!-- Servlet API（Tomcat 10 → Jakarta EE 10）-->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -35,7 +43,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSP API -->
+        <!-- JSP API（Jakarta 3.x）-->
         <dependency>
             <groupId>jakarta.servlet.jsp</groupId>
             <artifactId>jakarta.servlet.jsp-api</artifactId>
@@ -43,21 +51,44 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSTL API -->
+        <!-- JSTL（Jakarta 3.x）-->
+        <!-- API -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
             <version>3.0.0</version>
         </dependency>
 
-        <!-- JSTL 实现 -->
+        <!-- 实现（必须加，不然 JSTL 标签用不了） -->
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
         </dependency>
 
-        <!-- JUnit 测试 -->
+        <!-- Gson：JSON 解析（对接广告平台 API 用）-->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <!-- Druid 连接池（可选但推荐） -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.20</version>
+        </dependency>
+
+        <!-- Lombok：自动生成 getter/setter/toString -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JUnit（测试用） -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -65,14 +96,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Gson (JSON处理，广告接口用) -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
     </dependencies>
 
+    <!-- ======================= -->
+    <!-- 构建插件配置（编译、打包）-->
+    <!-- ======================= -->
     <build>
         <finalName>News</finalName>
 
@@ -87,6 +115,8 @@
         </resources>
 
         <plugins>
+
+            <!-- Java 编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -95,9 +125,19 @@
                     <source>17</source>
                     <target>17</target>
                     <encoding>UTF-8</encoding>
+
+                    <!-- Lombok 必须开启注解处理器 -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
+            <!-- war 打包插件（Tomcat 项目必备）-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -106,6 +146,7 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

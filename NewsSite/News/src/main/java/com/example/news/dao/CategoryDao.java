@@ -7,74 +7,75 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 分类数据访问层
- */
 public class CategoryDao {
 
     /**
-     * 查询所有分类
+     * 查询全部分类
      */
     public List<Category> findAll() {
-        String sql = "SELECT * FROM category ORDER BY category_id";
+        List<Category> list = new ArrayList<>();
+
+        String sql = "SELECT category_id, category_name, description, created_at FROM category ORDER BY category_id";
 
         Connection conn = null;
-        PreparedStatement ps = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<Category> list = new ArrayList<>();
 
         try {
             conn = DBUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
+            stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Category category = new Category();
-                category.setCategoryId(rs.getInt("category_id"));
-                category.setCategoryName(rs.getString("category_name"));
-                category.setDescription(rs.getString("description"));
-                category.setCreatedAt(rs.getTimestamp("created_at"));
-                list.add(category);
+                Category c = new Category();
+                c.setCategoryId(rs.getInt("category_id"));
+                c.setCategoryName(rs.getString("category_name"));
+                c.setDescription(rs.getString("description"));
+                c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                list.add(c);
             }
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DBUtil.close(conn, ps, rs);
+            DBUtil.close(rs, stmt, conn);
         }
 
         return list;
     }
 
     /**
-     * 根据 ID 查询分类
+     * 根据 ID 查询
      */
-    public Category findById(int categoryId) {
+    public Category findById(int id) {
         String sql = "SELECT * FROM category WHERE category_id = ?";
 
         Connection conn = null;
-        PreparedStatement ps = null;
+        PreparedStatement stmt = null;
         ResultSet rs = null;
+
+        Category c = null;
 
         try {
             conn = DBUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, categoryId);
-            rs = ps.executeQuery();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Category category = new Category();
-                category.setCategoryId(rs.getInt("category_id"));
-                category.setCategoryName(rs.getString("category_name"));
-                category.setDescription(rs.getString("description"));
-                category.setCreatedAt(rs.getTimestamp("created_at"));
-                return category;
+                c = new Category();
+                c.setCategoryId(rs.getInt("category_id"));
+                c.setCategoryName(rs.getString("category_name"));
+                c.setDescription(rs.getString("description"));
+                c.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
             }
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DBUtil.close(conn, ps, rs);
+            DBUtil.close(rs, stmt, conn);
         }
 
-        return null;
+        return c;
     }
 }

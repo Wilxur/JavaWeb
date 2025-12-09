@@ -9,81 +9,224 @@ import java.util.List;
 
 public class NewsDao {
 
-    // 必须要有无参构造
-    public NewsDao() {}
-
-    // 查询所有新闻
+    /**
+     * 查询全部新闻（含分类名称）
+     */
     public List<News> findAll() {
         List<News> list = new ArrayList<>();
-        String sql = "SELECT * FROM news ORDER BY publish_time DESC";
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        String sql =
+                "SELECT n.*, c.category_name " +
+                        "FROM news n LEFT JOIN category c ON n.category_id = c.category_id " +
+                        "ORDER BY n.published_at DESC";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
 
             while (rs.next()) {
-                News n = new News(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getTimestamp("publish_time")
-                );
+                News n = extractNews(rs);
                 list.add(n);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, stmt, conn);
         }
+
         return list;
     }
 
-    // 根据ID查询新闻
-    public News findById(int id) {
-        String sql = "SELECT * FROM news WHERE id=?";
-        News n = null;
+    /**
+     * 按分类查询
+     */
+    public List<News> findByCategory(int categoryId) {
+        List<News> list = new ArrayList<>();
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql =
+                "SELECT n.*, c.category_name " +
+                        "FROM news n LEFT JOIN category c ON n.category_id = c.category_id " +
+                        "WHERE n.category_id = ? ORDER BY n.published_at DESC";
 
-            stmt.setInt(1, id);
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    n = new News(
-                            rs.getInt("id"),
-                            rs.getString("title"),
-                            rs.getString("content"),
-                            rs.getTimestamp("publish_time")
-                    );
-                }
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, categoryId);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                News n = extractNews(rs);
+                list.add(n);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, stmt, conn);
         }
+
+        return list;
+    }
+
+    /**
+     * 新闻详情
+     */
+    public News findById(int id) {
+
+        String sql =
+                "SELECT n.*, c.category_name " +
+                        "FROM news n LEFT JOIN category c ON n.category_id = c.category_id " +
+                        "WHERE n.news_id = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        News n = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                n = extractNews(rs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs, stmt, conn);
+        }
+
         return n;
     }
-}
 
-public boolean incrementViewCount(int newsId) {
-    String sql = "UPDATE news SET view_count = view_count + 1 WHERE news_id = ?";
+    /**
+     * 浏览量 +1（线程安全）
+     */
+    public void incrementViewCount(int id) {
 
-    Connection conn = null;
-    PreparedStatement pstmt = null;
+        String sql = "UPDATE news SET view_count = view_count + 1 WHERE news_id = ?";
 
-    try {
-        conn = DBUtil.getConnection();
-        pstmt = conn.prepareStatement(sql);
-        pstmt.setInt(1, newsId);
+        Connection conn = null;
+        PreparedStatement stmt = null;
 
-        int rows = pstmt.executeUpdate();
-        return rows > 0;
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
 
-    } catch (SQLException e) {
-        System.err.println("增加浏览量失败: " + e.getMessage());
-        e.printStackTrace();
-        return false;
-    } finally {
-        DBUtil.close(pstmt, conn);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(null, stmt, conn);
+        }
+    }
+
+    /**
+     * 新增新闻
+     */
+    public void insert(News n) {
+
+        String sql =
+                "INSERT INTO news (title, content, author, category_id) VALUES (?, ?, ?, ?)";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, n.getTitle());
+            stmt.setString(2, n.getContent());
+            stmt.setString(3, n.getAuthor());
+            stmt.setInt(4, n.getCategoryId());
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(null, stmt, conn);
+        }
+    }
+
+    /**
+     * 编辑新闻
+     */
+    public void update(News n) {
+
+        String sql =
+                "UPDATE news SET title=?, content=?, author=?, category_id=? WHERE news_id=?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, n.getTitle());
+            stmt.setString(2, n.getContent());
+            stmt.setString(3, n.getAuthor());
+            stmt.setInt(4, n.getCategoryId());
+            stmt.setInt(5, n.getNewsId());
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(null, stmt, conn);
+        }
+    }
+
+    /**
+     * 删除新闻
+     */
+    public void delete(int id) {
+        String sql = "DELETE FROM news WHERE news_id = ?";
+
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(null, stmt, conn);
+        }
+    }
+
+    /**
+     * 从 ResultSet 映射一个 News 对象（复用）
+     */
+    private News extractNews(ResultSet rs) throws Exception {
+        News n = new News();
+        n.setNewsId(rs.getInt("news_id"));
+        n.setTitle(rs.getString("title"));
+        n.setContent(rs.getString("content"));
+        n.setAuthor(rs.getString("author"));
+        n.setCategoryId(rs.getInt("category_id"));
+        n.setViewCount(rs.getInt("view_count"));
+        n.setPublishedAt(rs.getTimestamp("published_at").toLocalDateTime());
+        n.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+        n.setCategoryName(rs.getString("category_name"));
+        return n;
     }
 }

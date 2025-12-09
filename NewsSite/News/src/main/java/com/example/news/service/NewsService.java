@@ -6,89 +6,65 @@ import com.example.news.model.News;
 import java.util.List;
 
 /**
- * 新闻业务逻辑层
- * 职责：封装业务逻辑，调用 DAO 层
+ * News 业务逻辑层
  */
 public class NewsService {
 
-    private NewsDao newsDao = new NewsDao();
+    private final NewsDao newsDao = new NewsDao();
 
     /**
-     * 获取所有新闻列表
+     * 查询全部新闻（含分类名称）
      */
     public List<News> getAllNews() {
         return newsDao.findAll();
     }
 
     /**
-     * 根据分类获取新闻
+     * 按分类查询
      */
     public List<News> getNewsByCategory(int categoryId) {
         return newsDao.findByCategory(categoryId);
     }
 
     /**
-     * 根据ID获取新闻详情
+     * 查询新闻详情
      */
-    public News getNewsById(int newsId) {
-        return newsDao.findById(newsId);
+    public News getNewsDetail(int id) {
+
+        // 1. 浏览量 +1（线程安全）
+        newsDao.incrementViewCount(id);
+
+        // 2. 再查询新闻详情
+        return newsDao.findById(id);
     }
 
     /**
-     * 添加新闻
-     * @return 新增的新闻ID，失败返回-1
+     * 新增新闻
      */
-    public int addNews(News news) {
-        // 业务校验
-        if (news.getTitle() == null || news.getTitle().trim().isEmpty()) {
-            return -1;
-        }
-        if (news.getContent() == null || news.getContent().trim().isEmpty()) {
-            return -1;
-        }
+    public void addNews(News news) {
 
-        // 设置默认作者
-        if (news.getAuthor() == null || news.getAuthor().trim().isEmpty()) {
-            news.setAuthor("匿名");
+        // 简单参数检查
+        if (news.getTitle() == null || news.getTitle().isEmpty()) {
+            throw new RuntimeException("新闻标题不能为空");
+        }
+        if (news.getContent() == null || news.getContent().isEmpty()) {
+            throw new RuntimeException("新闻内容不能为空");
         }
 
-        // 初始化浏览量
-        news.setViewCount(0);
-
-        return newsDao.insert(news);
+        newsDao.insert(news);
     }
 
     /**
-     * 更新新闻
+     * 编辑新闻
      */
-    public boolean updateNews(News news) {
-        if (news.getNewsId() == null) {
-            return false;
-        }
-        return newsDao.update(news);
+    public void updateNews(News news) {
+        newsDao.update(news);
     }
 
     /**
      * 删除新闻
      */
-    public boolean deleteNews(int newsId) {
-        return newsDao.deleteById(newsId);
-    }
-
-    /**
-     * 增加浏览量（用户阅读时调用，为广告推荐提供数据）
-     */
-    public void incrementViewCount(int newsId) {
-        newsDao.incrementViewCount(newsId);
-    }
-}
-
-
-public boolean incrementViewCount(int newsId) {
-    try {
-        return newsDao.incrementViewCount(newsId);
-    } catch (Exception e) {
-        System.err.println("增加浏览量失败: " + e.getMessage());
-        return false;
+    public void deleteNews(int id) {
+        newsDao.delete(id);
     }
 }
