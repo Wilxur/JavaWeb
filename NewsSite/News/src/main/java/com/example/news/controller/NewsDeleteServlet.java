@@ -1,6 +1,5 @@
 package com.example.news.controller;
 
-import com.example.news.model.News;
 import com.example.news.service.NewsService;
 
 import jakarta.servlet.ServletException;
@@ -9,8 +8,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet("/news/detail")
-public class NewsDetailServlet extends HttpServlet {
+@WebServlet("/news/delete")
+public class NewsDeleteServlet extends HttpServlet {
 
     private final NewsService newsService = new NewsService();
 
@@ -18,13 +17,10 @@ public class NewsDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String idStr = req.getParameter("id");
-        int id = Integer.parseInt(idStr);
+        int id = Integer.parseInt(req.getParameter("id"));
 
-        // 浏览量+1 并返回新闻详情
-        News news = newsService.getNewsDetail(id);
+        newsService.deleteNews(id);
 
-        req.setAttribute("news", news);
-        req.getRequestDispatcher("/jsp/news-detail.jsp").forward(req, resp);
+        resp.sendRedirect(req.getContextPath() + "/news/list");
     }
 }

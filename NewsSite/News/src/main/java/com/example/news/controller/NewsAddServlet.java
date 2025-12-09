@@ -12,8 +12,8 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/news/list")
-public class NewsListServlet extends HttpServlet {
+@WebServlet("/news/add")
+public class NewsAddServlet extends HttpServlet {
 
     private final NewsService newsService = new NewsService();
     private final CategoryService categoryService = new CategoryService();
@@ -22,15 +22,27 @@ public class NewsListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // 获取全部新闻
-        List<News> newsList = newsService.getAllNews();
-
-        // 获取分类（用于筛选）
         List<Category> categories = categoryService.getAllCategories();
-
-        req.setAttribute("newsList", newsList);
         req.setAttribute("categories", categories);
 
-        req.getRequestDispatcher("/jsp/news-list.jsp").forward(req, resp);
+        req.getRequestDispatcher("/jsp/news-add.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        req.setCharacterEncoding("UTF-8");
+
+        String title = req.getParameter("title");
+        String content = req.getParameter("content");
+        String author = req.getParameter("author");
+        int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+
+        News news = new News(title, content, author, categoryId);
+
+        newsService.addNews(news);
+
+        resp.sendRedirect(req.getContextPath() + "/news/list");
     }
 }

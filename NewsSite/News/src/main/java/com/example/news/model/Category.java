@@ -1,67 +1,27 @@
 package com.example.news.model;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import java.time.LocalDateTime;
 
 /**
  * 新闻分类实体类
+ * 对应数据库表：category
  */
-public class Category implements Serializable {
-    private static final long serialVersionUID = 1L;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Category {
 
     private Integer categoryId;
     private String categoryName;
     private String description;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    public Category() {}
-
-    public Category(Integer categoryId, String categoryName, String description, Timestamp createdAt) {
-        this.categoryId = categoryId;
+    /** 新增分类时使用 */
+    public Category(String categoryName, String description) {
         this.categoryName = categoryName;
         this.description = description;
-        this.createdAt = createdAt;
-    }
-
-    // Getter 和 Setter
-    public Integer getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    @Override
-    public String toString() {
-        return "Category{" +
-                "categoryId=" + categoryId +
-                ", categoryName='" + categoryName + '\'' +
-                ", description='" + description + '\'' +
-                '}';
     }
 }
