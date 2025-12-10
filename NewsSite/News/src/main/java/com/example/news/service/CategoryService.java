@@ -1,6 +1,7 @@
 package com.example.news.service;
 
 import com.example.news.dao.CategoryDao;
+import com.example.news.dao.impl.CategoryDaoImpl;
 import com.example.news.model.Category;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public class CategoryService {
 
-    private final CategoryDao categoryDao = new CategoryDao();
+    private final CategoryDao categoryDao = new CategoryDaoImpl();
 
     /**
      * 查询全部分类
