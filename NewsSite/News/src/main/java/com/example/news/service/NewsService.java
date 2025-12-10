@@ -2,6 +2,7 @@ package com.example.news.service;
 
 import com.example.news.dao.NewsDao;
 import com.example.news.model.News;
+import com.example.news.dao.impl.NewsDaoImpl;
 
 import java.util.List;
 
@@ -10,7 +11,8 @@ import java.util.List;
  */
 public class NewsService {
 
-    private final NewsDao newsDao = new NewsDao();
+
+    private NewsDao newsDao = new NewsDaoImpl();
 
     /**
      * 查询全部新闻（含分类名称）
