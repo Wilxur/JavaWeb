@@ -1,50 +1,39 @@
 package com.adplatform.model;
 
-public class UserInterest {
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+public class UserInterest implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String uid;
     private String category;
-    private int score;
-    private String lastUpdated;
+    private Integer score;
+    private LocalDateTime lastUpdated;
 
-    public UserInterest() {
-    }
+    public UserInterest() {}
 
-    public UserInterest(String uid, String category, int score, String lastUpdated) {
+    public UserInterest(String uid, String category, Integer score, LocalDateTime lastUpdated) {
         this.uid = uid;
         this.category = category;
         this.score = score;
         this.lastUpdated = lastUpdated;
     }
 
-    public String getUid() {
-        return uid;
-    }
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getCategory() {
-        return category;
-    }
+    public Integer getScore() { return score; }
+    public void setScore(Integer score) { this.score = score; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
+    public LocalDateTime getLastUpdated() { return lastUpdated; }
+    public void setLastUpdated(LocalDateTime lastUpdated) { this.lastUpdated = lastUpdated; }
 
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public String getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(String lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    @Override
+    public String toString() {
+        return "UserInterest{uid='" + uid + "', category='" + category + "', score=" + score + "}";
     }
 }
