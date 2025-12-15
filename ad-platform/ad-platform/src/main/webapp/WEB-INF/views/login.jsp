@@ -54,6 +54,14 @@
         <p class="text-muted">请登录您的账户</p>
     </div>
 
+    <!-- 退出成功提示 -->
+    <c:if test="${not empty param.loggedOut}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>已成功退出！</strong> 您已安全退出系统。
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </c:if>
+
     <!-- 错误消息显示区域 -->
     <c:if test="${not empty error}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -84,12 +92,6 @@
                    name="password"
                    placeholder="请输入密码"
                    required>
-        </div>
-
-        <!-- 记住我复选框 -->
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-            <label class="form-check-label" for="rememberMe">记住我（7天）</label>
         </div>
 
         <!-- 提交按钮 -->

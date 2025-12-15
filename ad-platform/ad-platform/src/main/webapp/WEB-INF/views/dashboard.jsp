@@ -67,11 +67,6 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/users">
-                        <i class="bi bi-people me-2"></i>用户管理
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="${pageContext.request.contextPath}/reports">
                         <i class="bi bi-bar-chart me-2"></i>数据报表
                     </a>
@@ -211,7 +206,7 @@
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <a href="${pageContext.request.contextPath}/ads/new" class="btn btn-primary">
+                                <a href="${pageContext.request.contextPath}/ad/new" class="btn btn-primary">
                                     <i class="bi bi-plus-circle me-2"></i>发布新广告
                                 </a>
                                 <a href="${pageContext.request.contextPath}/ads" class="btn btn-outline-secondary">
