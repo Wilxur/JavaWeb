@@ -72,8 +72,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/settings">
-                        <i class="bi bi-gear me-2"></i>系统设置
+                    <a class="nav-link" href="${pageContext.request.contextPath}/password">
+                        <i class="bi bi-lock me-2"></i>修改密码
                     </a>
                 </li>
                 <li class="nav-item mt-4">

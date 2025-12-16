@@ -41,11 +41,6 @@
                         <i class="bi bi-megaphone me-2"></i>广告管理
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-person-circle me-2"></i>个人中心
-                    </a>
-                </li>
                 <li class="nav-item mt-4">
                     <a class="nav-link text-warning" href="${pageContext.request.contextPath}/logout">
                         <i class="bi bi-box-arrow-right me-2"></i>退出登录
