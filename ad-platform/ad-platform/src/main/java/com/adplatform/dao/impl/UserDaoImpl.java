@@ -39,4 +39,24 @@ public class UserDaoImpl implements UserDao {
                 .findFirst()
                 .orElse(null);
     }
+
+    @Override
+    public User findById(int id) {
+        String sql = "SELECT * FROM users WHERE id = ? LIMIT 1";
+        return DBUtil.executeQuery(sql, USER_MAPPER, id)
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public int update(User user) {
+        String sql = "UPDATE users SET password = ?, email = ?, role = ? WHERE id = ?";
+        return DBUtil.executeUpdate(sql,
+                user.getPassword(),
+                user.getEmail(),
+                user.getRole(),
+                user.getId()
+        );
+    }
 }
