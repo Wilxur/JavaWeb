@@ -25,7 +25,7 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- 左侧导航栏（复制dashboard的侧边栏） -->
+        <!-- 左侧导航栏 -->
         <nav class="col-md-3 col-lg-2 px-0 sidebar">
             <div class="text-center mb-4 pt-4">
                 <h4 class="text-white">广告管理平台</h4>
@@ -39,11 +39,6 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="${pageContext.request.contextPath}/ads">
                         <i class="bi bi-megaphone me-2"></i>广告管理
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="bi bi-person-circle me-2"></i>个人中心
                     </a>
                 </li>
                 <li class="nav-item mt-4">
@@ -98,12 +93,17 @@
                             </div>
                         </div>
 
-                        <!-- 分类 -->
+                        <!-- 分类（下拉选择） -->
                         <div class="mb-3">
-                            <label for="category" class="form-label">广告分类</label>
-                            <input type="text" class="form-control" id="category" name="category"
-                                   value="${ad.category}" required maxlength="50"
-                                   placeholder="如：electronics, clothing, food">
+                            <label for="category" class="form-label">广告分类 *</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">请选择分类</option>
+                                <c:forEach items="${categories}" var="cat">
+                                    <option value="${cat.value}" ${ad.category == cat.value ? 'selected' : ''}>
+                                            ${cat.label}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
 
                         <!-- 标签 -->

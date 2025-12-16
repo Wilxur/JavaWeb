@@ -50,6 +50,23 @@ public class UserServiceImpl implements UserService {
         return userDao.findByUsername(username);
     }
 
+    @Override
+    public boolean changePassword(int userId, String oldPassword, String newPassword) {
+        User user = userDao.findById(userId);
+        if (user == null) {
+            return false;
+        }
+
+        // 验证旧密码
+        if (!user.getPassword().equals(encryptPassword(oldPassword))) {
+            return false; // 旧密码错误
+        }
+
+        // 更新为新密码
+        user.setPassword(encryptPassword(newPassword));
+        return userDao.update(user) > 0;
+    }
+
     /**
      * MD5密码加密（简单实现）
      * 生产环境建议使用BCryptPasswordEncoder
