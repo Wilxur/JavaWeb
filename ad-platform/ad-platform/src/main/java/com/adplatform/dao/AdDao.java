@@ -21,4 +21,7 @@ public interface AdDao {
 
     // 切换广告状态（上下线）
     int updateStatus(int id, int status);
+
+    // 按分类列表查询有效的广告（随机排序，避免总是同一广告）
+    List<Ad> findByCategories(List<String> categories);
 }
