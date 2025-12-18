@@ -1,12 +1,16 @@
 package com.adplatform.controller;
 
 import com.adplatform.model.User;
+import com.adplatform.model.ReportFilter;
 import com.adplatform.service.DashboardService;
 import com.adplatform.service.impl.DashboardServiceImpl;
+import com.adplatform.service.ReportService;
+import com.adplatform.service.impl.ReportServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Map;
 
 @WebServlet("/dashboard")
@@ -39,6 +43,16 @@ public class DashboardServlet extends HttpServlet {
         // 4. 设置Request属性供JSP使用
         request.setAttribute("stats", stats);
         request.setAttribute("currentUser", currentUser);
+
+        // ★★★ 新增：查询最近7天数据趋势 ★★★
+        ReportService reportService = new ReportServiceImpl();
+        ReportFilter filter = new ReportFilter();
+        LocalDate today = LocalDate.now();
+        filter.setStartDate(today.minusDays(7).toString());
+        filter.setEndDate(today.toString());
+
+        Map<String, Object> report = reportService.generateReport(currentUser, filter);
+        request.setAttribute("last7Days", report.get("stats"));
 
         // 5. 转发到JSP页面
         request.getRequestDispatcher("/WEB-INF/views/dashboard.jsp").forward(request, response);
