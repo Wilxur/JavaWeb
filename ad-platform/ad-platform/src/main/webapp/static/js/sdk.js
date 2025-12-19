@@ -12,18 +12,27 @@
         COOKIE_DAYS: 365,
         // 分类映射（各站点需自行配置）
         CATEGORY_MAP: {
-            // 示例：视频站分类映射
+            // ========== 新闻站（唐杰）映射 ==========
+            '科技': 'electronics',      // 科技新闻 → 电子产品
+            '体育': 'sports',           // 体育新闻 → 运动户外
+            '娱乐': 'beauty',           // 娱乐新闻 → 美妆护肤
+            '财经': 'home',             // 财经新闻 → 家居用品
+            '社会': 'home',             // 社会新闻 → 家居用品
+
+            // ========== 视频站（王瑞涵）映射 ==========
             'tech': 'electronics',
             'food-vlog': 'food',
             'beauty-vlog': 'beauty',
             'sports-vlog': 'sports',
-            // 新闻站分类映射
-            'tech-news': 'electronics',
-            'sports-news': 'sports',
-            'finance': 'home',
-            // 购物站直接使用标准分类
+            'life': 'home',
+
+            // ========== 购物站（魏瑄）—— 无需映射 ==========
             'electronics': 'electronics',
-            'clothing': 'clothing'
+            'clothing': 'clothing',
+            'food': 'food',
+            'beauty': 'beauty',
+            'home': 'home',
+            'sports': 'sports'
         }
     };
 
