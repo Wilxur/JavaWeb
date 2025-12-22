@@ -5,10 +5,10 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class PlayLog {
+public class User {
     private Long id;
-    private String uid;
-    private Long videoId;
-    private String eventType;
+    private String username;
+    private String password; // 存加密后的
+    private String createTime;
 
 }

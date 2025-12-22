@@ -1,0 +1,346 @@
+/* ===== 全局变量 ===== */
+:root {
+    --bg-main: #0f172a;
+    --bg-card: rgba(30, 41, 59, 0.85);
+    --bg-glass: rgba(255, 255, 255, 0.06);
+
+    --primary: #6366f1;
+    --primary-hover: #818cf8;
+    --danger: #ef4444;
+
+    --text-main: #e5e7eb;
+    --text-sub: #94a3b8;
+
+    --border: rgba(255, 255, 255, 0.12);
+    --radius: 16px;
+    --shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== 基础 ===== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    color: var(--text-main);
+    background:
+            radial-gradient(1200px 600px at 20% -10%, rgba(99,102,241,0.25), transparent 50%),
+            radial-gradient(800px 500px at 90% 20%, rgba(239,68,68,0.15), transparent 50%),
+            var(--bg-main);
+}
+
+/* ===== 布局 ===== */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+}
+
+/* ===== 顶栏 ===== */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.nav {
+    display: flex;
+    gap: 12px;
+}
+
+/* ===== 按钮 ===== */
+.btn {
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: var(--bg-glass);
+    color: var(--text-main);
+    transition: all 0.25s ease;
+}
+
+.btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, var(--primary), #4f46e5);
+}
+
+.btn.primary:hover {
+    background: linear-gradient(135deg, var(--primary-hover), var(--primary));
+}
+
+.btn.danger {
+    background: linear-gradient(135deg, var(--danger), #b91c1c);
+}
+
+/* ===== 表单 ===== */
+.form {
+    display: grid;
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label {
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.input,
+select {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.8);
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+/* ===== 验证码 ===== */
+.captcha {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.captcha img {
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+}
+
+/* ===== 提示 ===== */
+.alert {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fecaca;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+/* ===== 视频列表 ===== */
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.item .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.item .meta b {
+    font-size: 16px;
+}
+
+.tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    width: fit-content;
+    color: var(--text-sub);
+}
+
+/* ===== 视频播放 ===== */
+.video-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.video {
+    width: 100%;
+    max-height: 520px;
+    border-radius: 18px;
+    background: black;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .topbar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .nav {
+        flex-wrap: wrap;
+    }
+
+    .item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
+/* ===== 登录 / 注册 专用布局 ===== */
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-card);
+    border-radius: 22px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 34px 32px;
+    backdrop-filter: blur(16px);
+}
+
+/* ===== Logo 区 ===== */
+.auth-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.auth-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--primary), #4f46e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 10px 30px rgba(79,70,229,0.45);
+}
+
+.auth-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.auth-subtitle {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 6px;
+}
+
+/* 登录/注册底部操作 */
+.auth-footer {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+/* ===== 视频广告区域 ===== */
+.video-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ad-box {
+    min-height: 120px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.35);
+    background: rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+}
+
+/* SDK 注入内容后自适应 */
+#ad-container iframe,
+#ad-container img,
+#ad-container video {
+    max-width: 100%;
+    border-radius: 12px;
+}
+
+
+.ad-box {
+    min-height: 140px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.35);
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ad-box img,
+.ad-box video {
+    max-width: 100%;
+    max-height: 260px;
+    border-radius: 12px;
+}

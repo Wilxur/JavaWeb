@@ -5,10 +5,8 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class PlayLog {
+public class Category {
     private Long id;
-    private String uid;
-    private Long videoId;
-    private String eventType;
+    private String name;
 
 }
