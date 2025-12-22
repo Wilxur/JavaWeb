@@ -20,20 +20,13 @@
             '社会': 'home',             // 社会新闻 → 家居用品（民生、日常）
             '教育': 'electronics',      // 教育新闻 → 电子产品（学习设备、在线教育工具）
 
-            // ========== 视频站（王瑞涵）映射 ==========
-            'tech': 'electronics',
-            'food-vlog': 'food',
-            'beauty-vlog': 'beauty',
-            'sports-vlog': 'sports',
-            'life': 'home',
-
-            // ========== 购物站（魏瑄）—— 无需映射 ==========
-            'electronics': 'electronics',
-            'clothing': 'clothing',
-            'food': 'food',
-            'beauty': 'beauty',
-            'home': 'home',
-            'sports': 'sports'
+            // ========== 购物站（魏瑄）、视频站（王瑞涵）映射 ==========
+            '电子产品': 'electronics',    // 科技视频 → 电子产品
+            '服装鞋帽': 'clothing',       // 时尚视频 → 服装鞋帽
+            '食品饮料': 'food',           // 美食视频 → 食品饮料
+            '美妆护肤': 'beauty',         // 美妆视频 → 美妆护肤
+            '家居用品': 'home',           // 生活视频 → 家居用品
+            '运动户外': 'sports'          // 运动视频 → 运动户外
         }
     };
 
