@@ -1,53 +1,81 @@
 package com.example.news.util;
 
-import com.alibaba.druid.pool.DruidDataSourceFactory;
-
-import javax.sql.DataSource;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
-/**
- * Druid 数据库连接池工具类
- * 用于服务器部署，性能稳定，线程安全
- */
 public class DBUtil {
 
-    private static DataSource dataSource;
+    private static final Properties props = new Properties();
 
-    // 静态代码块在项目启动时只执行一次
     static {
         try {
-            Properties properties = new Properties();
-            properties.load(DBUtil.class.getClassLoader().getResourceAsStream("db.properties"));
-            dataSource = DruidDataSourceFactory.createDataSource(properties);
+            InputStream is = DBUtil.class
+                    .getClassLoader()
+                    .getResourceAsStream("db.properties");
+            if (is == null) {
+                throw new RuntimeException("db.properties 未找到");
+            }
+            props.load(is);
+            Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("加载数据库配置失败，请检查 db.properties");
+            throw new RuntimeException("DBUtil 初始化失败", e);
         }
     }
 
-    /**
-     * 获取数据库连接（从连接池中取，不需要手动创建）
-     */
     public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        return DriverManager.getConnection(
+                props.getProperty("db.url"),
+                props.getProperty("db.username"),
+                props.getProperty("db.password")
+        );
     }
 
-    /**
-     * 统一关闭资源（连接池回收连接）
-     */
-    public static void close(ResultSet rs, Statement stmt, Connection conn) {
+    public static int executeUpdate(String sql, Object... params) {
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        try {
-            if (rs != null) rs.close();
-        } catch (Exception ignored) {}
+            for (int i = 0; i < params.length; i++) {
+                ps.setObject(i + 1, params[i]);
+            }
+            return ps.executeUpdate();
 
-        try {
-            if (stmt != null) stmt.close();
-        } catch (Exception ignored) {}
+        } catch (SQLException e) {
+            throw new RuntimeException("更新失败：" + sql, e);
+        }
+    }
 
-        try {
-            if (conn != null) conn.close();  // 归还连接池
-        } catch (Exception ignored) {}
+    public static <T> List<T> executeQuery(
+            String sql,
+            RowMapper<T> mapper,
+            Object... params
+    ) {
+        List<T> list = new ArrayList<>();
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < params.length; i++) {
+                ps.setObject(i + 1, params[i]);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapper.mapRow(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException("查询失败：" + sql, e);
+        }
+
+        return list;
+    }
+
+    @FunctionalInterface
+    public interface RowMapper<T> {
+        T mapRow(ResultSet rs) throws SQLException;
     }
 }
