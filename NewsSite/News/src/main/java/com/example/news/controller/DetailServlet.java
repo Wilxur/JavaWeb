@@ -9,8 +9,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet("/news/detail")
-public class NewsDetailServlet extends HttpServlet {
+@WebServlet("/detail")
+public class DetailServlet extends HttpServlet {
 
     private final NewsService newsService = new NewsService();
 
@@ -18,13 +18,16 @@ public class NewsDetailServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String idStr = req.getParameter("id");
-        int id = Integer.parseInt(idStr);
+        int id = Integer.parseInt(req.getParameter("id"));
+        News news = newsService.getNewsById(id);
 
-        // 浏览量+1 并返回新闻详情
-        News news = newsService.getNewsDetail(id);
+        if (news == null) {
+            resp.sendError(404, "新闻不存在");
+            return;
+        }
 
         req.setAttribute("news", news);
-        req.getRequestDispatcher("/jsp/news-detail.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/jsp/detail.jsp")
+                .forward(req, resp);
     }
 }

@@ -300,47 +300,129 @@ select:focus {
     color: var(--text-sub);
 }
 
-/* ===== 视频广告区域 ===== */
-.video-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+/* ====== 贴片广告播放器（同一位置覆盖）====== */
+.player {
+    position: relative;
+    width: 100%;
+    border-radius: 18px;
+    overflow: hidden;
 }
 
-.ad-box {
-    min-height: 120px;
-    border-radius: 14px;
-    border: 1px dashed rgba(255,255,255,0.35);
-    background: rgba(0,0,0,0.25);
+.player .video {
+    width: 100%;
+    max-height: 520px;
+    border-radius: 18px;
+    background: #000;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: block;
+}
+
+/* 广告覆盖层 */
+.ad-overlay {
+    position: absolute;
+    inset: 0;
+    display: none; /* 默认不显示，JS 控制 */
+    background: rgba(0,0,0,0.92);
+    z-index: 20;
+    border-radius: 18px;
+}
+
+.ad-overlay.is-active {
+    display: block;
+}
+
+.ad-topbar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 30;
+}
+
+.ad-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ad-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ad-countdown {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+}
+
+.ad-skip {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.92);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ad-skip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ad-skip:not(:disabled):hover {
+    background: rgba(255,255,255,0.18);
+}
+
+/* 广告内容承载区（铺满播放器） */
+.ad-media-host {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255,255,255,0.6);
-    font-size: 14px;
 }
 
-/* SDK 注入内容后自适应 */
-#ad-container iframe,
-#ad-container img,
-#ad-container video {
-    max-width: 100%;
-    border-radius: 12px;
+.ad-media-host video,
+.ad-media-host img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
 }
 
+/* 自动播放失败时提示按钮 */
+.ad-play-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 40;
 
-.ad-box {
-    min-height: 140px;
-    border-radius: 14px;
-    border: 1px dashed rgba(255,255,255,0.35);
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.95);
+    font-weight: 800;
+    cursor: pointer;
 }
-
-.ad-box img,
-.ad-box video {
-    max-width: 100%;
-    max-height: 260px;
-    border-radius: 12px;
+.ad-play-btn:hover {
+    background: rgba(255,255,255,0.18);
 }

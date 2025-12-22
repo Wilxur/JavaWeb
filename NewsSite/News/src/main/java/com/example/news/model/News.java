@@ -1,37 +1,22 @@
 package com.example.news.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+
+import java.sql.Timestamp;
 
 /**
- * 新闻实体类
- * 对应数据库表：news
+ * 新闻实体（数据映射）
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class News {
 
-    private Integer newsId;
+    private Integer id;
     private String title;
     private String content;
-    private String author;
-    private Integer categoryId;
+
+    // 分类：用于广告系统 meta 注入
+    private String category;
+
+    private Timestamp publishTime;
     private Integer viewCount;
-    private LocalDateTime publishedAt;
-    private LocalDateTime updatedAt;
-
-    /** 扩展字段：分类名称（连表查询用） */
-    private String categoryName;
-
-    /** 新增新闻时使用 */
-    public News(String title, String content, String author, Integer categoryId) {
-        this.title = title;
-        this.content = content;
-        this.author = author;
-        this.categoryId = categoryId;
-        this.viewCount = 0;
-    }
 }
