@@ -12,7 +12,7 @@ import java.util.UUID;
 @WebFilter("/*")
 public class UIDFilter implements Filter {
 
-    private static final String COOKIE_NAME = "vp_uid";
+    private static final String COOKIE_NAME = "ad_platform_uid";
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
