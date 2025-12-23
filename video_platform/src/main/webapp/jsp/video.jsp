@@ -26,6 +26,7 @@
                     id="mainVideo"
                     class="video"
                     data-video-id="${video.id}"
+                    data-category="${video.categoryName}"
                     controls
                     preload="metadata"
                     src="${pageContext.request.contextPath}/media?path=${video.filePath}">
