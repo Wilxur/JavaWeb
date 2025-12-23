@@ -13,9 +13,22 @@
 
     <div class="topbar">
         <div class="brand">Video Platform <span class="badge">JavaWeb</span></div>
+
         <div class="nav">
-            <a class="btn" href="${pageContext.request.contextPath}/upload">上传视频</a>
-            <a class="btn danger" href="${pageContext.request.contextPath}/logout">退出</a>
+            <!-- 已登录 -->
+            <c:if test="${not empty sessionScope.user}">
+                <span class="welcome">
+                    欢迎，${sessionScope.user.username}
+                </span>
+                <a class="btn" href="${pageContext.request.contextPath}/upload">上传视频</a>
+                <a class="btn danger" href="${pageContext.request.contextPath}/logout">退出</a>
+            </c:if>
+
+            <!-- 未登录 -->
+            <c:if test="${empty sessionScope.user}">
+                <a class="btn primary" href="${pageContext.request.contextPath}/login">登录</a>
+                <a class="btn" href="${pageContext.request.contextPath}/registerPage">注册</a>
+            </c:if>
         </div>
     </div>
 
