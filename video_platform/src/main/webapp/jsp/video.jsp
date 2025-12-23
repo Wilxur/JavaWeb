@@ -4,15 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>${video.title}</title>
-
-    <!-- 页面样式 -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
 </head>
 <body>
 
 <div class="container">
 
-    <!-- 顶部栏 -->
     <div class="topbar">
         <div class="brand">${video.title}</div>
         <div class="nav">
@@ -20,31 +17,45 @@
         </div>
     </div>
 
-    <!-- 播放区域 -->
-    <div class="card video-wrap">
+    <div class="card">
+        <!-- 播放器区域：广告与正片同一位置 -->
+        <div class="player">
 
-        <!-- ===== 广告区域（可展示视频 / 图片广告）===== -->
-        <div id="ad-container" class="ad-box">
-            <!-- 广告内容由 video-player.js 动态注入 -->
+            <!-- 正片视频（底层） -->
+            <video
+                    id="mainVideo"
+                    class="video"
+                    data-video-id="${video.id}"
+                    controls
+                    preload="metadata"
+                    src="${pageContext.request.contextPath}/media?path=${video.filePath}">
+                您的浏览器不支持 video 标签
+            </video>
+
+            <!-- 广告层（覆盖在正片上方） -->
+            <div id="adOverlay" class="ad-overlay" aria-hidden="true">
+                <div class="ad-topbar">
+                    <span class="ad-badge">广告</span>
+                    <div class="ad-actions">
+                        <span id="adCountdown" class="ad-countdown">加载中...</span>
+                        <button id="adSkipBtn" class="ad-skip" type="button" disabled>跳过</button>
+                    </div>
+                </div>
+
+                <!-- 广告媒体（JS 动态注入 video/img） -->
+                <div id="adMediaHost" class="ad-media-host"></div>
+
+                <!-- 自动播放失败时的提示 -->
+                <button id="adPlayBtn" class="ad-play-btn" type="button" style="display:none;">
+                    点击播放广告
+                </button>
+            </div>
+
         </div>
-
-        <!-- ===== 正片视频 ===== -->
-        <video
-                id="mainVideo"
-                class="video"
-                data-video-id="${video.id}"
-                controls
-                preload="metadata"
-                src="${pageContext.request.contextPath}/media?path=${video.filePath}">
-            您的浏览器不支持 video 标签
-        </video>
-
     </div>
 
 </div>
 
-<!-- 视频 & 广告控制逻辑 -->
 <script src="${pageContext.request.contextPath}/assets/js/video-player.js"></script>
-
 </body>
 </html>
