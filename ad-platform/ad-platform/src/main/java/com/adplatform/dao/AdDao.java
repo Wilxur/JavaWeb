@@ -24,4 +24,12 @@ public interface AdDao {
 
     // 按分类列表查询有效的广告（随机排序，避免总是同一广告）
     List<Ad> findByCategories(List<String> categories);
+
+    /**
+     * ★★★ 按分类和广告类型查询 ★★★
+     * @param categories 分类列表
+     * @param adTypes 允许的广告类型列表 ["video", "image", "text"]
+     * @return 广告列表
+     */
+    List<Ad> findByCategoriesAndTypes(List<String> categories, List<String> adTypes);
 }

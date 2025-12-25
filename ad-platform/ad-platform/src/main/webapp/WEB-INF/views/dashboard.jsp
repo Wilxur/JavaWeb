@@ -214,6 +214,8 @@
                                     ctrData.push(${data.ctr});
                                     </c:forEach>
 
+                                    dates.reverse();
+                                    ctrData.reverse();
                                     // 初始化图表
                                     var chart = echarts.init(document.getElementById('dashboardChart'));
                                     var option = {
