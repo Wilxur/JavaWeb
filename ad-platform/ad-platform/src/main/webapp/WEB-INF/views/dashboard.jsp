@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <html>
 <head>
     <title>广告管理平台 - 仪表板</title>
@@ -10,6 +11,8 @@
     <link href="${pageContext.request.contextPath}/static/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="${pageContext.request.contextPath}/static/icons/bootstrap-icons.css" rel="stylesheet">
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -190,11 +193,89 @@
                             <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>最近7天数据趋势</h6>
                         </div>
                         <div class="card-body">
-                            <div class="text-center text-muted py-5">
-                                <i class="bi bi-bar-chart-line fs-1"></i>
-                                <p class="mt-2">图表功能将在后续版本中添加</p>
-                                <small>敬请期待...</small>
-                            </div>
+                            <c:if test="${empty last7Days}">
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-bar-chart-line fs-1"></i>
+                                    <p class="mt-2">暂无最近7天数据</p>
+                                    <small>请稍后再试</small>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${not empty last7Days}">
+                                <!-- 折线图容器 -->
+                                <div id="dashboardChart" style="height: 300px;"></div>
+
+                                <script>
+                                    // 准备数据
+                                    var dates = [];
+                                    var ctrData = [];
+                                    <c:forEach items="${last7Days}" var="data">
+                                    dates.push('${data.date}');
+                                    ctrData.push(${data.ctr});
+                                    </c:forEach>
+
+                                    dates.reverse();
+                                    ctrData.reverse();
+                                    // 初始化图表
+                                    var chart = echarts.init(document.getElementById('dashboardChart'));
+                                    var option = {
+                                        title: {
+                                            text: '最近7天CTR趋势',
+                                            left: 'center',
+                                            textStyle: { fontSize: 16 }
+                                        },
+                                        tooltip: {
+                                            trigger: 'axis',
+                                            formatter: '{b}<br/>CTR: {c}%'
+                                        },
+                                        xAxis: {
+                                            type: 'category',
+                                            data: dates,
+                                            axisLabel: { rotate: 45 }
+                                        },
+                                        yAxis: {
+                                            type: 'value',
+                                            axisLabel: { formatter: '{value}%' }
+                                        },
+                                        series: [{
+                                            data: ctrData,
+                                            type: 'line',
+                                            smooth: true,
+                                            symbol: 'circle',
+                                            symbolSize: 8,
+                                            lineStyle: {
+                                                color: '#667eea',
+                                                width: 3
+                                            },
+                                            itemStyle: {
+                                                color: '#667eea'
+                                            },
+                                            areaStyle: {
+                                                color: {
+                                                    type: 'linear',
+                                                    x: 0, y: 0, x2: 0, y2: 1,
+                                                    colorStops: [
+                                                        { offset: 0, color: 'rgba(102, 126, 234, 0.3)' },
+                                                        { offset: 1, color: 'rgba(102, 126, 234, 0.05)' }
+                                                    ]
+                                                }
+                                            }
+                                        }],
+                                        grid: {
+                                            left: '3%',
+                                            right: '4%',
+                                            bottom: '3%',
+                                            containLabel: true
+                                        }
+                                    };
+                                    chart.setOption(option);
+
+                                    // 响应式
+                                    window.addEventListener('resize', function() {
+                                        chart.resize();
+                                    });
+                                </script>
+                            </c:if>
                         </div>
                     </div>
                 </div>

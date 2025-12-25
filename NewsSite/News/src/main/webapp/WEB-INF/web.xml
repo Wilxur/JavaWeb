@@ -5,12 +5,11 @@
          https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-    <display-name>NewsSite</display-name>
-    <description>新闻网站 - 匿名用户精准广告投放系统</description>
+
 
     <!-- 欢迎页面 -->
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>home</welcome-file>
     </welcome-file-list>
 
 </web-app>

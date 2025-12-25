@@ -1,27 +1,28 @@
 package com.example.news.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+
+import java.sql.Timestamp;
 
 /**
- * 新闻分类实体类
- * 对应数据库表：category
+ * 新闻分类实体（Day 3）
+ * 只负责数据库字段映射，不包含业务逻辑
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Category {
 
-    private Integer categoryId;
-    private String categoryName;
-    private String description;
-    private LocalDateTime createdAt;
+    /**
+     * 分类ID
+     */
+    private Integer id;
 
-    /** 新增分类时使用 */
-    public Category(String categoryName, String description) {
-        this.categoryName = categoryName;
-        this.description = description;
-    }
+    /**
+     * 分类名称（如：科技、财经）
+     */
+    private String name;
+
+    /**
+     * 创建时间
+     */
+    private Timestamp createdAt;
 }

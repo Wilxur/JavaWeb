@@ -1,20 +1,27 @@
 package com.example.video_platform.controller;
 
-import jakarta.servlet.ServletException;
+import com.example.video_platform.model.Category;
+import com.example.video_platform.service.CategoryService;
+import com.example.video_platform.service.impl.CategoryServiceImpl;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/upload")
 public class UploadPageServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+    private final CategoryService categoryService = new CategoryServiceImpl();
 
-        req.getRequestDispatcher("/jsp/upload.jsp").forward(req, resp);
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            List<Category> categories = categoryService.listAll();
+            req.setAttribute("categories", categories);
+            req.getRequestDispatcher("/jsp/upload.jsp").forward(req, resp);
+        } catch (Exception e) {
+            resp.sendError(500);
+        }
     }
 }

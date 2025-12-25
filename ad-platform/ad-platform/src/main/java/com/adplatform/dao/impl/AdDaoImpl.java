@@ -78,4 +78,38 @@ public class AdDaoImpl implements AdDao {
         String sql = "UPDATE ads SET status = ? WHERE id = ?";
         return DBUtil.executeUpdate(sql, status, id);
     }
+
+    @Override
+    public List<Ad> findByCategories(List<String> categories) {
+        // 构建IN子句 (?, ?, ?)
+        String placeholders = String.join(",", categories.stream()
+                .map(c -> "?")
+                .toArray(String[]::new));
+
+        String sql = String.format(
+                "SELECT * FROM ads WHERE category IN (%s) AND status = 1 ORDER BY RAND()",
+                placeholders
+        );
+
+        return DBUtil.executeQuery(sql, AD_MAPPER, categories.toArray());
+    }
+
+    @Override
+    public List<Ad> findByCategoriesAndTypes(List<String> categories, List<String> adTypes) {
+        String categoryPlaceholders = String.join(",", categories.stream().map(c -> "?").toArray(String[]::new));
+        String typePlaceholders = String.join(",", adTypes.stream().map(t -> "?").toArray(String[]::new));
+
+        String sql = String.format(
+                "SELECT * FROM ads WHERE category IN (%s) AND ad_type IN (%s) AND status = 1 ORDER BY RAND()",
+                categoryPlaceholders,
+                typePlaceholders
+        );
+
+        Object[] params = new Object[categories.size() + adTypes.size()];
+        int i = 0;
+        for (String cat : categories) params[i++] = cat;
+        for (String type : adTypes) params[i++] = type;
+
+        return DBUtil.executeQuery(sql, AD_MAPPER, params);
+    }
 }
