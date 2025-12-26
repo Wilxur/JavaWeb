@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<!-- ===== 登录状态区域（关键） ===== -->
+<!-- ===== 登录状态区域 ===== -->
 <div>
     <c:choose>
         <c:when test="${not empty sessionScope.loginUser}">
@@ -17,7 +17,12 @@
                 <strong>${sessionScope.loginUser.username}</strong>
             </span>
             |
-            <!-- ⚠️ 必须这样写，才能真的触发 LogoutServlet -->
+            <!-- 发布新闻入口（关键新增） -->
+            <a href="${pageContext.request.contextPath}/news/add">
+                发布新闻
+            </a>
+            |
+            <!-- 退出登录 -->
             <a href="${pageContext.request.contextPath}/logout">
                 退出登录
             </a>
@@ -38,11 +43,24 @@
 
 <ul>
     <c:forEach var="news" items="${newsList}">
-        <li>
-            <a href="${pageContext.request.contextPath}/detail?id=${news.id}">
-                【${news.category}】${news.title}
-            </a>
+
+        <li style="margin-bottom:12px;">
+            <div>
+                <a href="${pageContext.request.contextPath}/detail?id=${news.id}">
+                    【${news.category}】${news.title}
+                </a>
+            </div>
+
+            <!-- 编辑入口：仅登录用户可见 -->
+            <c:if test="${not empty sessionScope.loginUser}">
+                <div style="font-size:12px; color:#666; margin-top:4px;">
+                    <a href="${pageContext.request.contextPath}/news/edit?id=${news.id}">
+                        编辑
+                    </a>
+                </div>
+            </c:if>
         </li>
+
     </c:forEach>
 </ul>
 
