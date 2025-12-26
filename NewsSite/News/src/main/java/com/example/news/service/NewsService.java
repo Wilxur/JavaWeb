@@ -47,4 +47,8 @@ public class NewsService {
     public boolean updateNews(News news) {
         return newsDao.update(news) > 0;
     }
+
+    public List<News> getNewsByCategory(int categoryId) {
+        return newsDao.findByCategoryId(categoryId);
+    }
 }

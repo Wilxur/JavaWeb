@@ -1,37 +1,157 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>用户注册</title>
+
+    <style>
+        /* ===== 页面基础 ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+            "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== 注册卡片 ===== */
+        .register-card {
+            width: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 36px 32px 30px;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+        }
+
+        .register-card h2 {
+            text-align: center;
+            margin-bottom: 28px;
+            color: #1f2937;
+            letter-spacing: 1px;
+        }
+
+        /* ===== 表单 ===== */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        /* ===== 按钮 ===== */
+        .register-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px 0;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .register-btn:hover {
+            background: linear-gradient(90deg, #1d4ed8, #2563eb);
+        }
+
+        /* ===== 错误提示 ===== */
+        .error-msg {
+            margin-top: 14px;
+            text-align: center;
+            color: #dc2626;
+            font-size: 14px;
+        }
+
+        /* ===== 底部返回登录 ===== */
+        .back-login {
+            margin-top: 26px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .back-login a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-login a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-<h2>用户注册</h2>
+<div class="register-card">
 
-<form method="post" action="${pageContext.request.contextPath}/register">
-    <div>
-        用户名：
-        <input type="text" name="username" required />
-    </div>
-    <div>
-        密码：
-        <input type="password" name="password" required />
-    </div>
-    <div>
-        <button type="submit">注册</button>
-    </div>
-</form>
+    <h2>用户注册</h2>
 
-<c:if test="${not empty error}">
-    <p style="color:red">${error}</p>
-</c:if>
+    <form method="post" action="${pageContext.request.contextPath}/register">
 
-<p>
-    <a href="${pageContext.request.contextPath}/login">
-        返回登录
-    </a>
-</p>
+        <div class="form-group">
+            <label>用户名</label>
+            <input type="text" name="username" required />
+        </div>
+
+        <div class="form-group">
+            <label>密码</label>
+            <input type="password" name="password" required />
+        </div>
+
+        <button class="register-btn" type="submit">
+            注册
+        </button>
+
+    </form>
+
+    <!-- 注册失败提示 -->
+    <c:if test="${not empty error}">
+        <div class="error-msg">
+                ${error}
+        </div>
+    </c:if>
+
+    <!-- 返回登录 -->
+    <div class="back-login">
+        已有账号？
+        <a href="${pageContext.request.contextPath}/login">
+            返回登录
+        </a>
+    </div>
+
+</div>
 
 </body>
 </html>
