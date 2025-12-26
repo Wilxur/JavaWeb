@@ -1,29 +1,35 @@
 /**
- * 广告平台跨站追踪SDK v1.0
- * 功能: UID管理、广告渲染、行为采集
+ * 广告平台跨站追踪与渲染SDK v2.0
+ * 文件名：sdk.js（保持原名，不要改）
+ * 功能: UID管理、广告渲染、行为采集（保留原分类映射）
  */
+
 (function(window, document) {
     'use strict';
 
-    // 配置（生产环境建议从服务端动态生成）
+    // ===== 配置（保留原有分类映射）=====
     const CONFIG = {
-        API_HOST: 'https://ad-platform.com:8080', // 你的域名
+        API_HOST: 'http://10.100.164.17:8080/ad-platform',  // 各网站需修改为自己的地址
+        SITE_ID: 'video',  // 网站标识: video/shopping/news（各网站必须修改！）
         COOKIE_NAME: 'ad_platform_uid',
         COOKIE_DAYS: 365,
-        // 分类映射（各站点需自行配置）
+        // 分类映射（保留原有映射表）
         CATEGORY_MAP: {
-            // 示例：视频站分类映射
-            'tech': 'electronics',
-            'food-vlog': 'food',
-            'beauty-vlog': 'beauty',
-            'sports-vlog': 'sports',
-            // 新闻站分类映射
-            'tech-news': 'electronics',
-            'sports-news': 'sports',
-            'finance': 'home',
-            // 购物站直接使用标准分类
-            'electronics': 'electronics',
-            'clothing': 'clothing'
+            // ========== 新闻站（唐杰）映射 ==========
+            '科技': 'electronics',
+            '财经': 'home',
+            '体育': 'sports',
+            '娱乐': 'beauty',
+            '社会': 'home',
+            '教育': 'electronics',
+
+            // ========== 购物站（魏瑄）、视频站（王瑞涵）映射 ==========
+            '电子产品': 'electronics',
+            '服装鞋帽': 'clothing',
+            '食品饮料': 'food',
+            '美妆护肤': 'beauty',
+            '家居用品': 'home',
+            '运动户外': 'sports'
         }
     };
 
@@ -35,15 +41,14 @@
     function setCookie(name, value, days) {
         const expires = new Date();
         expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;domain=.ad-platform.com`;
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
     }
 
     function getCookie(name) {
         const nameEQ = name + "=";
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            let c = ca[i].trim();
             if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
         }
         return null;
@@ -59,156 +64,174 @@
     }
 
     // ==================== 分类识别 ====================
-    function getCategory() {
-        // 方法1: 从页面meta标签读取
-        const metaCategory = document.querySelector('meta[name="ad-category"]');
-        if (metaCategory) {
-            return metaCategory.getAttribute('content');
-        }
-
-        // 方法2: 从URL路径识别
-        const path = window.location.pathname;
-        if (path.includes('/tech/') || path.includes('/electronics/')) return 'electronics';
-        if (path.includes('/food/')) return 'food';
-        if (path.includes('/beauty/')) return 'beauty';
-        if (path.includes('/sports/')) return 'sports';
-        if (path.includes('/home/')) return 'home';
-        if (path.includes('/clothing/')) return 'clothing';
-
-        // 方法3: 从页面标题/内容智能识别（简单版）
-        const title = document.title.toLowerCase();
-        if (title.includes('科技') || title.includes('数码')) return 'electronics';
-        if (title.includes('美食') || title.includes('食品')) return 'food';
-
-        // 默认值
-        return 'electronics';
-    }
-
     function getMappedCategory() {
-        const rawCategory = getCategory();
-        return CONFIG.CATEGORY_MAP[rawCategory] || rawCategory;
-    }
+        const meta = document.querySelector('meta[name="page-category"]');
+        if (meta) return meta.getAttribute('content') || 'electronics';
 
-    // ==================== 广告渲染 ====================
-    function createAdElement(ad) {
-        if (!ad) return null;
-
-        const container = document.getElementById('ad-container') || document.body;
-        const adElement = document.createElement('div');
-        adElement.className = 'ad-platform-ad';
-        adElement.style.cssText = 'border: 1px solid #eee; padding: 10px; margin: 10px 0;';
-
-        // 根据广告类型渲染
-        if (ad.adType === 'text') {
-            adElement.innerHTML = `
-                <h5>${ad.title}</h5>
-                <p>${ad.content}</p>
-                <small style="color:#999">广告</small>
-            `;
-        } else if (ad.adType === 'image') {
-            adElement.innerHTML = `
-                <img src="${ad.content}" style="max-width:100%;" alt="${ad.title}">
-                <p style="margin-top:5px;">${ad.title}</p>
-            `;
-        } else if (ad.adType === 'video') {
-            adElement.innerHTML = `
-                <video controls style="max-width:100%;">
-                    <source src="${ad.content}" type="video/mp4">
-                </video>
-                <p>${ad.title}</p>
-            `;
+        // 使用配置的映射表
+        const rawCategory = document.title || window.location.pathname;
+        for (const [key, value] of Object.entries(CONFIG.CATEGORY_MAP)) {
+            if (rawCategory.includes(key)) return value;
         }
-
-        // 绑定点击事件
-        adElement.addEventListener('click', function() {
-            trackClick(ad.id, ad.content);
-        });
-
-        container.appendChild(adElement);
-        return adElement;
+        return 'electronics'; // 默认
     }
 
-    // ==================== 行为追踪 ====================
+    // ==================== 日志上报 ====================
     function trackImpression(adId, category) {
         const uid = getUserId();
+        if (!uid) return;
+
         const img = new Image();
-        img.src = `${CONFIG.API_HOST}/api/track/impression?uid=${uid}&adId=${adId}&site=${window.location.host}&category=${category}`;
+        img.src = `${CONFIG.API_HOST}/api/track/impression?` +
+            `uid=${uid}&adId=${adId}&site=${CONFIG.SITE_ID}&category=${category}`;
         img.style.display = 'none';
         document.body.appendChild(img);
+        setTimeout(() => img.remove(), 1000);
     }
 
-    function trackClick(adId, redirectUrl) {
+    function trackClick(adId, redirectUrl, category) {
         const uid = getUserId();
-        const category = getMappedCategory();
+        if (!uid) return;
 
-        // 异步上报点击
-        fetch(`${CONFIG.API_HOST}/api/track/click?uid=${uid}&adId=${adId}&site=${window.location.host}&category=${category}&redirect=${encodeURIComponent(redirectUrl)}`, {
-            method: 'GET',
-            credentials: 'include'
-        });
+        fetch(`${CONFIG.API_HOST}/api/track/click?` +
+            `uid=${uid}&adId=${adId}&site=${CONFIG.SITE_ID}&category=${category}` +
+            `&redirect=${encodeURIComponent(redirectUrl || '')}`,
+            { credentials: 'include' }
+        );
     }
 
-    // ==================== 主函数 ====================
-    function initAd() {
-        const uid = getUserId();
-        const category = getMappedCategory();
-
-        // 获取广告
-        fetch(`${CONFIG.API_HOST}/api/ad/get?uid=${uid}&category=${category}`, {
-            credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.ad) {
-                    const ad = data.ad;
-                    createAdElement(ad);
-                    // 上报展示
-                    trackImpression(ad.id, category);
-                } else {
-                    console.warn('广告获取失败:', data.message);
-                }
-            })
-            .catch(err => {
-                console.error('广告加载错误:', err);
-            });
-    }
-
-    // ==================== 对外API ====================
+    // ==================== 核心渲染API ====================
     const AdPlatformSDK = {
-        // 获取当前用户ID
-        getUserId: getUserId,
+        /**
+         * 一键渲染广告到容器（自动上报 & 绑定点击）
+         * @param {string} containerId - 容器DOM的ID
+         * @param {Object} ad - 广告对象（必须有 id, adType, content, category）
+         * @param {Object} options - 可选配置（如自定义样式）
+         * @returns {HTMLElement|null} 渲染后的广告元素
+         */
+        renderAd: function(containerId, ad, options) {
+            const container = document.getElementById(containerId);
+            if (!container || !ad || !ad.id) {
+                console.error('❌ 容器或广告对象无效');
+                return null;
+            }
 
-        // 手动更新兴趣（用于页面无广告时）
-        updateInterest: function(category, increment) {
-            const uid = getUserId();
-            fetch(`${CONFIG.API_HOST}/api/user/interest`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid: uid, category: category })
-            });
+            container.innerHTML = ''; // 清空容器
+
+            let adElement = null;
+            const category = ad.category || getMappedCategory();
+
+            // 根据类型渲染
+            switch (ad.adType) {
+                case 'video':
+                    adElement = this._createVideoElement(ad, category);
+                    break;
+                case 'image':
+                    adElement = this._createImageElement(ad, category);
+                    break;
+                case 'text':
+                    adElement = this._createTextElement(ad, category);
+                    break;
+                default:
+                    console.error('❌ 不支持的 adType:', ad.adType);
+                    return null;
+            }
+
+            container.appendChild(adElement);
+            return adElement;
         },
 
-        // 手动渲染广告（用于动态加载）
-        renderAd: function(containerId) {
-            initAd();
+        // 创建视频元素（返回元素，播放逻辑由调用方控制）
+        _createVideoElement: function(ad, category) {
+            const video = document.createElement('video');
+            video.src = ad.content;
+            video.controls = true;
+            video.autoplay = true;
+            video.muted = true;
+            video.playsInline = true;
+            video.style.width = '100%';
+            video.style.borderRadius = '8px';
+            video.dataset.adId = ad.id;
+            video.dataset.category = category;
+            return video;
         },
 
-        // 设置分类映射（各站点可自定义）
+        // 创建图片元素（自动上报 & 绑定点击）
+        _createImageElement: function(ad, category) {
+            const img = document.createElement('img');
+            img.src = ad.content;
+            img.alt = ad.title || '广告图片';
+            img.style.maxWidth = '100%';
+            img.style.cursor = 'pointer';
+            img.style.borderRadius = '8px';
+
+            // 自动上报展示
+            trackImpression(ad.id, category);
+
+            // 绑定点击（上报+跳转）
+            img.onclick = () => {
+                trackClick(ad.id, ad.content, category);
+                window.open(ad.content, '_blank');
+            };
+
+            return img;
+        },
+
+        // 创建文字元素（自动上报 & 绑定点击）
+        _createTextElement: function(ad, category) {
+            const div = document.createElement('div');
+            div.style.padding = '12px';
+            div.style.background = '#f5f5f5';
+            div.style.borderRadius = '8px';
+            div.style.cursor = 'pointer';
+
+            const link = document.createElement('a');
+            link.href = ad.content;
+            link.innerText = ad.title || ad.content;
+            link.style.textDecoration = 'none';
+            link.style.color = '#333';
+            link.style.fontWeight = '500';
+
+            // 自动上报展示
+            trackImpression(ad.id, category);
+
+            // 绑定点击
+            link.onclick = (e) => {
+                e.preventDefault();
+                trackClick(ad.id, ad.content, category);
+                window.open(ad.content, '_blank');
+            };
+
+            div.appendChild(link);
+            return div;
+        },
+
+        /**
+         * 设置站点ID（必须调用）
+         * @param {string} siteId - video/shopping/news
+         */
+        setSite: function(siteId) {
+            CONFIG.SITE_ID = siteId;
+        },
+
+        /**
+         * 设置自定义分类映射（可选）
+         * @param {Object} map - 映射表
+         */
         setCategoryMap: function(map) {
             Object.assign(CONFIG.CATEGORY_MAP, map);
+        },
+
+        /**
+         * 获取用户ID（手动上报时使用）
+         * @returns {string} UID
+         */
+        getUserId: function() {
+            return getUserId();
         }
     };
 
-    // ==================== 自动初始化 ====================
-    // 页面加载完成后自动执行
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAd);
-    } else {
-        initAd();
-    }
-
-    // 暴露到全局
+    // ==================== 暴露到全局 ====================
     window.AdPlatformSDK = AdPlatformSDK;
 
 })(window, document);

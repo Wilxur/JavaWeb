@@ -1,13 +1,14 @@
 package com.example.video_platform.model;
 
-import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
 public class PlayLog {
     private Long id;
     private String uid;
     private Long videoId;
     private String eventType;
-    private LocalDateTime eventTime;
+
 }

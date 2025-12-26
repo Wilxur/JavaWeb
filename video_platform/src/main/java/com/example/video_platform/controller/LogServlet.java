@@ -13,14 +13,12 @@ public class LogServlet extends HttpServlet {
     private final LogService logService = new LogServiceImpl();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
-
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String uid = (String) req.getAttribute("uid");
         Long videoId = Long.parseLong(req.getParameter("videoId"));
         String eventType = req.getParameter("eventType");
 
         logService.log(uid, videoId, eventType);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setStatus(200);
     }
 }

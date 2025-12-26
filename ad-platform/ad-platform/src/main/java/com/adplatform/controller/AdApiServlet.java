@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -21,47 +22,52 @@ import com.google.gson.JsonSerializer;
 
 @WebServlet("/api/ad/get")
 public class AdApiServlet extends HttpServlet {
-    private AdRecommendationService recommendationService = new AdRecommendationServiceImpl();
 
-    // ✅ 修复：注册LocalDateTime序列化器
+    // ★★★ 定义可信的站点列表（根据你的实际IP和端口修改）★★★
+    private static final Set<String> ALLOWED_ORIGINS = Set.of(
+            "http://localhost:8080",
+            "http://10.100.164.34:8080",
+            "http://10.100.164.16:8080",
+            "http://10.100.164.17:8080",
+            "http://10.100.164.18:8080"
+    );
+
+    private AdRecommendationService recommendationService = new AdRecommendationServiceImpl();
     private Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
-                @Override
-                public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
-                    return new JsonPrimitive(src.toString()); // 转为字符串
-                }
-            })
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
+                    new JsonPrimitive(src.toString()))
             .create();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 1. 设置CORS头（允许跨域）
+
+        // ★★★ 修复CORS判断 ★★★
         String origin = request.getHeader("Origin");
-        if (origin != null && (origin.contains("localhost") || origin.contains("com"))) {
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
         }
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type");
         response.setContentType("application/json;charset=UTF-8");
 
         try {
-            // 2. 获取参数（优先Cookie，其次URL参数）
             String uid = getUidFromRequest(request);
             String pageCategory = request.getParameter("category");
-            String callback = request.getParameter("callback"); // JSONP支持
+            String site = request.getParameter("site"); // ★★★ 新增站点参数
+            String callback = request.getParameter("callback");
 
-            // 3. 参数校验
-            if (uid == null || pageCategory == null) {
-                sendError(response, callback, "参数缺失: uid或category");
+            // 参数校验
+            if (uid == null || pageCategory == null || site == null) {
+                sendError(response, callback, "参数缺失: uid或category或site");
                 return;
             }
 
-            // 4. 调用推荐算法
-            Ad ad = recommendationService.recommend(uid, pageCategory);
+            // 调用推荐算法（传入site）
+            Ad ad = recommendationService.recommend(uid, pageCategory, site);
 
-            // 5. 构建响应
             Map<String, Object> result = new HashMap<>();
             if (ad != null) {
                 result.put("success", true);
@@ -72,7 +78,6 @@ public class AdApiServlet extends HttpServlet {
                 result.put("message", "暂无可用广告");
             }
 
-            // 6. 输出JSON/JSONP
             String json = gson.toJson(result);
             if (callback != null) {
                 response.getWriter().write(callback + "(" + json + ");");
@@ -86,17 +91,31 @@ public class AdApiServlet extends HttpServlet {
         }
     }
 
+    // ★★★ 处理OPTIONS预检请求（浏览器会自动发）★★★
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String origin = request.getHeader("Origin");
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, *");
+        response.setStatus(200); // 预检请求返回200即可
+    }
+
     /**
-     * 从Cookie或URL参数获取UID
+     * 从Cookie或URL参数获取UID（保持原有逻辑）
      */
     private String getUidFromRequest(HttpServletRequest request) {
-        // 优先从URL参数获取（兼容非Cookie场景）
         String uid = request.getParameter("uid");
         if (uid != null && !uid.isEmpty()) {
             return uid;
         }
 
-        // 其次从Cookie读取
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {

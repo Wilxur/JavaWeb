@@ -1,32 +1,39 @@
 package com.example.video_platform.controller;
 
-import jakarta.servlet.ServletException;
+import com.example.video_platform.model.Category;
+import com.example.video_platform.model.Video;
+import com.example.video_platform.service.CategoryService;
+import com.example.video_platform.service.VideoService;
+import com.example.video_platform.service.impl.CategoryServiceImpl;
+import com.example.video_platform.service.impl.VideoServiceImpl;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-/**
- * 视频列表：转发到 videos.jsp
- * 先用占位数据跑通页面，后续替换为 service 查询数据库
- */
 @WebServlet("/videos")
 public class VideoListServlet extends HttpServlet {
 
+    private final VideoService videoService = new VideoServiceImpl();
+    private final CategoryService categoryService = new CategoryServiceImpl();
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            String cid = req.getParameter("categoryId");
+            Long categoryId = (cid == null || cid.isBlank()) ? null : Long.parseLong(cid);
 
-        // 占位数据（后续换成 VideoService.findAll/findByCategory）
-        List<Map<String, Object>> videos = new ArrayList<>();
-        videos.add(Map.of("id", 1L, "title", "示例视频-1", "category", "默认分类"));
-        videos.add(Map.of("id", 2L, "title", "示例视频-2", "category", "默认分类"));
+            List<Video> videos = videoService.list(categoryId);
+            List<Category> categories = categoryService.listAll();
 
-        req.setAttribute("videos", videos);
-        req.getRequestDispatcher("/jsp/videos.jsp").forward(req, resp);
+            req.setAttribute("videos", videos);
+            req.setAttribute("categories", categories);
+            req.setAttribute("selectedCategoryId", categoryId);
+
+            req.getRequestDispatcher("/jsp/videos.jsp").forward(req, resp);
+        } catch (Exception e) {
+            resp.sendError(500, e.getMessage());
+        }
     }
 }

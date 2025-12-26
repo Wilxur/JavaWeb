@@ -38,7 +38,7 @@ public class CaptchaServlet extends HttpServlet {
         g.fillRect(0, 0, WIDTH, HEIGHT);
 
         // 设置字体
-        g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.setFont(new Font("SansSerif", Font.BOLD, 24));
 
         // 生成随机验证码
         Random random = new Random();

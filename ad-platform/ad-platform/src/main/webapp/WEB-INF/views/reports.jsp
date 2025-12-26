@@ -294,7 +294,9 @@
                     clicks.push(${data.clicks});
                     ctr.push(${data.ctr});
                     </c:forEach>
-
+                    dates.reverse();
+                    impressions.reverse();
+                    clicks.reverse();
                     // 初始化数量图表
                     var chartQty = echarts.init(document.getElementById('reportsChartQuantity'));
                     var optionQty = {
@@ -362,7 +364,8 @@
                         }
                     };
                     chartQty.setOption(optionQty);
-
+                    dates.reverse();
+                    ctr.reverse();
                     // 初始化CTR图表
                     var chartCTR = echarts.init(document.getElementById('reportsChartCTR'));
                     var optionCTR = {

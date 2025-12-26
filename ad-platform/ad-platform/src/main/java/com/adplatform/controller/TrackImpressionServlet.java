@@ -30,18 +30,26 @@ public class TrackImpressionServlet extends HttpServlet {
         response.setContentLength(GIF_DATA.length);
 
         try {
-            // 2. 获取参数
+            // 2. ★★★ 获取参数（全部移到try内，防止解析异常 ★★★
             String uid = request.getParameter("uid");
-            int adId = Integer.parseInt(request.getParameter("adId"));
+            String adIdStr = request.getParameter("adId");
             String site = request.getParameter("site");
             String category = request.getParameter("category");
 
-            // 3. 记录展示日志（写入ad_impressions表）
+            // 3. ★★★ 参数完整性检查 ★★★
+            if (adIdStr == null || site == null) {
+                // 参数不完整，只返回GIF不记录日志
+                return;
+            }
+
+            int adId = Integer.parseInt(adIdStr);
+
+            // 4. 记录展示日志（写入ad_impressions表）
             String sql = "INSERT INTO ad_impressions(ad_id, uid, site, page_category) VALUES(?, ?, ?, ?)";
             DBUtil.executeUpdate(sql, adId, uid, site, category);
 
-            // 4. 更新用户兴趣（展示行为权重+1）
-            if (uid != null && category != null) {
+            // 5. 更新用户兴趣（展示行为权重+1）
+            if (uid != null && category != null && !category.isEmpty()) {
                 interestService.updateInterest(uid, category, 1);
                 // 衰减旧兴趣
                 interestService.decayOldInterests(uid, category);
@@ -51,7 +59,7 @@ public class TrackImpressionServlet extends HttpServlet {
             // 日志记录失败也不影响返回GIF
             e.printStackTrace();
         } finally {
-            // 5. 返回1x1 GIF
+            // 6. 返回1x1 GIF
             response.getOutputStream().write(GIF_DATA);
         }
     }

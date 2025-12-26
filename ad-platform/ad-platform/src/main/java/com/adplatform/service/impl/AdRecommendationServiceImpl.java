@@ -9,20 +9,22 @@ import com.adplatform.model.UserInterest;
 import com.adplatform.service.AdRecommendationService;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class AdRecommendationServiceImpl implements AdRecommendationService {
     private UserInterestDao userInterestDao = new UserInterestDaoImpl();
     private AdDao adDao = new AdDaoImpl();
 
-    private static final int TOP_INTERESTS_LIMIT = 5; // 取TOP5兴趣
-    private static final double CURRENT_CATEGORY_BOOST = 1.5; // 当前分类权重提升
+    private static final int TOP_INTERESTS_LIMIT = 5;
+    private static final double CURRENT_CATEGORY_BOOST = 1.5;
 
     @Override
-    public Ad recommend(String uid, String pageCategory) {
+    public Ad recommend(String uid, String pageCategory, String site) {
         // 1. 获取用户TOP5兴趣
         List<UserInterest> userInterests = userInterestDao.findTopByUid(uid, TOP_INTERESTS_LIMIT);
 
-        // 2. 构建权重Map: category -> weight
+        // 2. 构建权重Map
         Map<String, Double> categoryWeights = new HashMap<>();
         int totalScore = userInterests.stream().mapToInt(UserInterest::getScore).sum();
 
@@ -31,38 +33,57 @@ public class AdRecommendationServiceImpl implements AdRecommendationService {
             categoryWeights.put(interest.getCategory(), weight);
         }
 
-        // 3. 保底：当前页面分类至少0.1权重，如果在TOP5中则提升
+        // 3. 添加当前页面分类权重
         categoryWeights.putIfAbsent(pageCategory, 0.1);
         if (categoryWeights.containsKey(pageCategory)) {
             categoryWeights.put(pageCategory, categoryWeights.get(pageCategory) * CURRENT_CATEGORY_BOOST);
         }
 
-        // 4. 查询候选广告（按权重高的分类优先）
+        // 4. ★★★ 根据站点类型确定广告类型 ★★★
+        List<String> allowedAdTypes = getAllowedAdTypes(site); // ["video"] 或 ["image","text"]
+
+        // 5. 查询候选广告（按权重高的分类优先）
         List<String> candidateCategories = categoryWeights.entrySet().stream()
                 .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        List<Ad> candidateAds = adDao.findByCategories(candidateCategories);
+        List<Ad> candidateAds = adDao.findByCategoriesAndTypes(candidateCategories, allowedAdTypes);
 
         if (candidateAds.isEmpty()) {
-            // 冷启动：返回最新广告
-            return getFallbackAd(pageCategory);
+            // 冷启动：返回最新广告（但仍要过滤类型）
+            return getFallbackAd(pageCategory, allowedAdTypes);
         }
 
-        // 5. 按权重排序并返回最优
-        return candidateAds.stream()
-                .max(Comparator.comparingDouble(ad ->
-                        categoryWeights.getOrDefault(ad.getCategory(), 0.0)))
-                .orElse(candidateAds.get(0));
+        // 6. ★★★ 随机选择，避免总是同一个广告 ★★★
+        Collections.shuffle(candidateAds); // 打乱顺序
+        return candidateAds.get(0); // 随机取第一个
     }
 
     /**
-     * 冷启动兜底：返回当前分类的最新广告
+     * ★★★ 根据站点类型返回允许的广告类型 ★★★
      */
-    private Ad getFallbackAd(String pageCategory) {
+    private List<String> getAllowedAdTypes(String site) {
+        if (site == null) return Arrays.asList("image", "text"); // 默认
+
+        switch (site.toLowerCase()) {
+            case "video":
+                return Collections.singletonList("video");
+            case "shopping":
+                return Arrays.asList("image"); // 购物站可以图片+文字
+            case "news":
+                return Collections.singletonList("text"); // 新闻站只显示文字（加载快）
+            default:
+                return Arrays.asList("image", "text");
+        }
+    }
+
+    /**
+     * 冷启动兜底：返回指定类型的新广告
+     */
+    private Ad getFallbackAd(String pageCategory,List<String> allowedTypes) {
         List<String> categories = Collections.singletonList(pageCategory);
-        List<Ad> ads = adDao.findByCategories(categories);
+        List<Ad> ads = adDao.findByCategoriesAndTypes(categories, allowedTypes);
         return ads.isEmpty() ? null : ads.get(0);
     }
 }
