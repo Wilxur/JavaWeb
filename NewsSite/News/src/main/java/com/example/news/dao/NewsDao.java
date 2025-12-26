@@ -22,4 +22,6 @@ public interface NewsDao {
 
     /* ========= D ========= */
     int deleteById(int id);
+
+    List<News> findByCategoryId(int categoryId);
 }
