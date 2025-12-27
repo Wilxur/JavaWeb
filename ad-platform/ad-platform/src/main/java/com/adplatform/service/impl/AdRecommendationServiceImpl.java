@@ -73,7 +73,7 @@ public class AdRecommendationServiceImpl implements AdRecommendationService {
             case "video":
                 return Collections.singletonList("video");
             case "shopping":
-                return Arrays.asList("image", "text"); // 购物站可以图片+文字
+                return Arrays.asList("image"); // 购物站可以图片+文字
             case "news":
                 return Collections.singletonList("text"); // 新闻站只显示文字（加载快）
             default:
