@@ -21,6 +21,9 @@ public class AdRecommendationServiceImpl implements AdRecommendationService {
 
     @Override
     public Ad recommend(String uid, String pageCategory, String site) {
+        System.out.println("【recommend方法】接收参数 pageCategory=" + pageCategory);
+        System.out.println("【recommend方法】接收参数 site=" + site);
+
         // 1. 获取用户TOP5兴趣
         List<UserInterest> userInterests = userInterestDao.findTopByUid(uid, TOP_INTERESTS_LIMIT);
 

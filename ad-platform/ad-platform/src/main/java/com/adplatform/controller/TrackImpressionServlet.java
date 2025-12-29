@@ -7,6 +7,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @WebServlet("/api/track/impression")
 public class TrackImpressionServlet extends HttpServlet {
@@ -21,25 +24,42 @@ public class TrackImpressionServlet extends HttpServlet {
             0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x44, 0x01, 0x00, 0x3b
     };
 
+    // ★★★ 添加CORS白名单（与AdApiServlet一致）★★★
+    private static final Set<String> ALLOWED_ORIGINS = new HashSet<>(Arrays.asList(
+            "http://localhost:8080",
+            "http://10.100.164.34:8080",
+            "http://10.100.164.16:8080",
+            "http://10.100.164.17:8080",
+            "http://10.100.164.18:8080"
+    ));
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // ★★★ 添加CORS头（关键修复）★★★
+        String origin = request.getHeader("Origin");
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
         // 1. 设置响应为GIF图片
         response.setContentType("image/gif");
         response.setContentLength(GIF_DATA.length);
 
         try {
-            // 2. ★★★ 获取参数（全部移到try内，防止解析异常 ★★★
+            // 2. 获取参数
             String uid = request.getParameter("uid");
             String adIdStr = request.getParameter("adId");
             String site = request.getParameter("site");
             String category = request.getParameter("category");
 
-            // 3. ★★★ 参数完整性检查 ★★★
+            // 3. 参数完整性检查
             if (adIdStr == null || site == null) {
-                // 参数不完整，只返回GIF不记录日志
-                return;
+                return; // 只返回GIF不记录日志
             }
 
             int adId = Integer.parseInt(adIdStr);
@@ -56,11 +76,25 @@ public class TrackImpressionServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            // 日志记录失败也不影响返回GIF
             e.printStackTrace();
         } finally {
             // 6. 返回1x1 GIF
             response.getOutputStream().write(GIF_DATA);
         }
+    }
+
+    // ★★★ 处理OPTIONS预检请求（关键修复）★★★
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String origin = request.getHeader("Origin");
+        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, *");
+        response.setStatus(200); // 预检请求返回200
     }
 }
