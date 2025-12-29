@@ -5,10 +5,7 @@
 <html>
 <head>
     <title>${news.title}</title>
-
-    <!-- 给广告平台的分类说明符 -->
-    <meta name="ad-category" content="${news.category}">
-
+    <meta name="page-category" content="${news.category}">
     <style>
         /* ===== 基础 ===== */
         * {
@@ -111,9 +108,9 @@
             text-decoration: underline;
         }
 
-        /* ===== 广告区 ===== */
-        .ad-box {
-            margin: 36px auto 10px;
+        /* ==================== 广告样式添加 ==================== */
+        .ad-container {
+            margin: 40px auto 20px;
             padding: 24px;
             border: 2px dashed #93c5fd;
             border-radius: 14px;
@@ -121,6 +118,37 @@
             background-color: #eff6ff;
             color: #2563eb;
             font-weight: 500;
+            max-width: 900px;
+        }
+
+        .ad-container h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+
+        .ad-placeholder {
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 广告内容渲染后的样式 */
+        .ad-image {
+            max-width: 100% !important;
+            height: auto !important;
+            max-height: 180px !important;
+            border-radius: 8px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .ad-text {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            line-height: 1.6;
         }
 
         /* ===== 返回 ===== */
@@ -141,6 +169,28 @@
             }
         }
     </style>
+    <script src="http://10.100.164.17:8080/ad-platform/static/js/sdk.js"></script>
+    <script>
+        console.log('🎯 SDK加载监控脚本已初始化');
+        window.sdkLoaded = false;
+        window.sdkLoadCallbacks = [];
+
+        function onSDKLoaded() {
+            console.log('✅ SDK脚本标签加载完成');
+            window.sdkLoaded = true;
+            window.sdkLoadCallbacks.forEach(callback => {
+                try {
+                    callback();
+                } catch (e) {
+                    console.error('❌ SDK回调执行失败:', e);
+                }
+            });
+            window.sdkLoadCallbacks = [];
+        }
+
+        // 延迟500ms确保SDK全局变量可用
+        setTimeout(onSDKLoaded, 500);
+    </script>
 </head>
 <body>
 
@@ -188,20 +238,129 @@
         </c:if>
 
     </div>
-
-    <!-- 广告 -->
-    <div id="ad-container" class="ad-box">
-        广告加载中…
+    <div class="ad-container">
+        <h3>💡 相关推荐</h3>
+        <div id="ad-news-bottom" class="ad-placeholder">
+            广告加载中...
+        </div>
     </div>
-
-    <!-- 广告平台 SDK -->
-    <script src="http://10.100.164.17:8080/ad-platform/static/js/sdk.js"></script>
-
     <a class="back-link" href="${pageContext.request.contextPath}/home">
         ← 返回首页
     </a>
 
 </div>
+<script>
+    // ==================== 全局定义 ====================
+    var AD_API_HOST = 'http://10.100.164.17:8080/ad-platform';
+    var AD_SITE_ID = 'news';
 
+    // ==================== 广告加载模块 ====================
+    (function() {
+        console.log('🎯 新闻站广告加载模块已启动');
+
+        function waitForReady(callback) {
+            let attempts = 0;
+            const maxAttempts = 50;
+
+            const check = () => {
+                attempts++;
+                const adContainer = document.getElementById('ad-news-bottom');
+                const sdkReady = typeof AdPlatformSDK !== 'undefined';
+
+                if (adContainer && sdkReady && typeof AdPlatformSDK.getUserId === 'function') {
+                    console.log('✅ DOM和SDK都已准备好');
+                    callback();
+                } else if (attempts >= maxAttempts) {
+                    console.error('❌ 超时');
+                } else {
+                    if (attempts === 1) console.log('⏳ 等待DOM和SDK...');
+                    setTimeout(check, 100);
+                }
+            };
+            check();
+        }
+
+        function loadAd(containerId) {
+            console.log('📢 [' + containerId + '] 开始加载广告...');
+
+            try {
+                // 获取UID
+                let uid = 'test-uid-' + Date.now();
+                if (typeof AdPlatformSDK !== 'undefined' && typeof AdPlatformSDK.getUserId === 'function') {
+                    uid = AdPlatformSDK.getUserId() || 'default-' + Date.now();
+                }
+                console.log('📢 UID:', uid);
+
+                // ✅ 关键：直接传递中文分类，让后端API处理映射
+                const categoryMeta = document.querySelector('meta[name="page-category"]');
+                const category = categoryMeta ? categoryMeta.getAttribute('content') : 'electronics';
+                console.log('📢 新闻分类(中文):', category); // 输出: 社会 / 体育 / 科技
+
+                // 显示加载中状态
+                const container = document.getElementById(containerId);
+                container.innerHTML = '<div style="color: #999;">🔄 正在加载相关推荐...</div>';
+
+                // 构建请求URL（传递中文分类）
+                const apiUrl = AD_API_HOST + '/api/ad/get?uid=' + encodeURIComponent(uid) +
+                    '&category=' + encodeURIComponent(category) +
+                    '&site=' + encodeURIComponent(AD_SITE_ID);
+                console.log('📢 请求URL:', apiUrl);
+
+                // 调用API
+                fetch(apiUrl)
+                    .then(response => {
+                        console.log('📢 HTTP状态码:', response.status);
+                        if (!response.ok) throw new Error('HTTP ' + response.status);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('✅ API返回:', data);
+                        if (data && data.success === true && data.ad) {
+                            console.log('🎯 广告对象:', data.ad);
+                            container.innerHTML = '';
+                            AdPlatformSDK.renderAd(containerId, data.ad);
+                            console.log('✅ 渲染成功！');
+                            reportAdImpression(data.ad.id, uid, category);
+                        } else {
+                            const msg = (data && data.message) ? data.message : '暂无推荐';
+                            container.innerHTML = '<div style="color: #999;">' + msg + '</div>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ 加载失败:', error);
+                        container.innerHTML = '<div style="color: #e74c3c;">推荐加载失败</div>';
+                    });
+            } catch (e) {
+                console.error('❌ 初始化异常:', e);
+            }
+        }
+
+        function reportAdImpression(adId, uid, category) {
+            try {
+                const url = AD_API_HOST + '/api/track/impression?uid=' + encodeURIComponent(uid) +
+                    '&adId=' + encodeURIComponent(adId) + '&site=' + encodeURIComponent(AD_SITE_ID) +
+                    '&category=' + encodeURIComponent(category);
+                console.log('📢 上报展示:', url);
+                fetch(url)
+                    .then(() => console.log('📢 广告 ' + adId + ' 上报成功'))
+                    .catch(err => console.error('❌ 上报失败:', err));
+            } catch (e) {
+                console.error('❌ 上报异常:', e);
+            }
+        }
+
+        function initAds() {
+            console.log('🚀 开始初始化新闻站广告...');
+            console.log('✅ SDK配置完成，站点: ' + AD_SITE_ID);
+
+            setTimeout(() => {
+                console.log('⏰ 延迟完成，开始加载广告');
+                loadAd('ad-news-bottom');
+            }, 500);
+        }
+
+        waitForReady(initAds);
+    })();
+</script>
 </body>
 </html>
