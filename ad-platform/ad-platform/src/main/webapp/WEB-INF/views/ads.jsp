@@ -42,7 +42,7 @@
                     </a>
                 </li>
                 <li class="nav-item mt-4">
-                    <a class="nav-link text-warning" href="${pageContext.request.contextPath}/logout">
+                    <a class="nav-link text-warning" href="${pageContext.request.contextPath}/logout" onclick="return confirm('确定要退出登录吗？')">
                         <i class="bi bi-box-arrow-right me-2"></i>退出登录
                     </a>
                 </li>
@@ -78,7 +78,8 @@
                     </c:if>
 
                     <c:if test="${not empty ads}">
-                        <div class="table-responsive">
+                        <!-- 可滚动的表格区域 -->
+                        <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
                             <table class="table table-hover">
                                 <thead>
                                 <tr>
@@ -97,22 +98,21 @@
                                         <td>${ad.id}</td>
                                         <td>${ad.title}</td>
                                         <td>
-                                                <span class="badge bg-info">
-                                                        ${ad.adType == 'text' ? '文字' : ad.adType == 'image' ? '图片' : '视频'}
-                                                </span>
+                                        <span class="badge bg-info">
+                                                ${ad.adType == 'text' ? '文字' : ad.adType == 'image' ? '图片' : '视频'}
+                                        </span>
                                         </td>
                                         <td>${ad.category}</td>
                                         <td>
-                                                <span class="badge ${ad.status == 1 ? 'bg-success' : 'bg-secondary'}">
-                                                        ${ad.status == 1 ? '上线' : '下线'}
-                                                </span>
+                                        <span class="badge ${ad.status == 1 ? 'bg-success' : 'bg-secondary'}">
+                                                ${ad.status == 1 ? '上线' : '下线'}
+                                        </span>
                                         </td>
                                         <td>${ad.createdAt}</td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
                                                 <a href="${pageContext.request.contextPath}/ad/edit?id=${ad.id}"
                                                    class="btn btn-outline-primary">编辑</a>
-
                                                 <c:choose>
                                                     <c:when test="${ad.status == 1}">
                                                         <a href="${pageContext.request.contextPath}/ad/toggle?id=${ad.id}&status=0"
@@ -123,7 +123,6 @@
                                                            class="btn btn-outline-success">上线</a>
                                                     </c:otherwise>
                                                 </c:choose>
-
                                                 <a href="${pageContext.request.contextPath}/ad/delete?id=${ad.id}"
                                                    class="btn btn-outline-danger"
                                                    onclick="return confirm('确定要删除这条广告吗？')">删除</a>
