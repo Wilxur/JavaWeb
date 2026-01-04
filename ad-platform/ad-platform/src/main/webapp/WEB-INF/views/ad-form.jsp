@@ -42,7 +42,7 @@
                     </a>
                 </li>
                 <li class="nav-item mt-4">
-                    <a class="nav-link text-warning" href="${pageContext.request.contextPath}/logout">
+                    <a class="nav-link text-warning" href="${pageContext.request.contextPath}/logout" onclick="return confirm('确定要退出登录吗？')">
                         <i class="bi bi-box-arrow-right me-2"></i>退出登录
                     </a>
                 </li>
