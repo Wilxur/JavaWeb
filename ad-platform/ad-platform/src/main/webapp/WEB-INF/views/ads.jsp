@@ -25,7 +25,7 @@
 <body>
 <div class="container-fluid">
     <div class="row">
-        <!-- 左侧导航栏（复制dashboard的侧边栏，广告管理高亮） -->
+        <!-- 左侧导航栏 -->
         <nav class="col-md-3 col-lg-2 px-0 sidebar">
             <div class="text-center mb-4 pt-4">
                 <h4 class="text-white">广告管理平台</h4>
@@ -52,7 +52,15 @@
         <!-- 主内容区 -->
         <main class="col-md-9 col-lg-10 px-4 py-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>我的广告列表</h2>
+                <div class="d-flex align-items-center">
+                    <h2 class="mb-0">我的广告列表</h2>
+                    <select id="adTypeFilter" class="form-select ms-3" style="width: 150px;">
+                        <option value="all">全部类型</option>
+                        <option value="text">文字广告</option>
+                        <option value="image">图片广告</option>
+                        <option value="video">视频广告</option>
+                    </select>
+                </div>
                 <a href="${pageContext.request.contextPath}/ad/new" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-2"></i>发布新广告
                 </a>
@@ -78,7 +86,9 @@
                     </c:if>
 
                     <c:if test="${not empty ads}">
-                        <!-- 可滚动的表格区域 -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span id="filterCount" class="text-muted">正在加载...</span>
+                        </div>
                         <div class="table-responsive" style="max-height: 65vh; overflow-y: auto;">
                             <table class="table table-hover">
                                 <thead>
@@ -142,24 +152,63 @@
 
 <!-- 本地Bootstrap JS -->
 <script src="${pageContext.request.contextPath}/static/js/bootstrap.bundle.min.js"></script>
-<!-- 自动消失提示脚本 -->
+<!-- 自动消失提示 + 分类筛选脚本 -->
 <script>
-    // 页面加载完成后执行
     document.addEventListener('DOMContentLoaded', function() {
-        // 查找成功提示框
+        const filterSelect = document.getElementById('adTypeFilter');
+        const tableRows = document.querySelectorAll('tbody tr');
+        const filterCount = document.getElementById('filterCount');
+
+        function updateCount(visibleCount, totalCount) {
+            if (filterCount) {
+                if (visibleCount === totalCount) {
+                    filterCount.textContent = `共 ${totalCount} 条广告`;
+                } else {
+                    filterCount.textContent = `显示 ${visibleCount} / ${totalCount} 条广告`;
+                }
+            }
+        }
+
+        function filterAds() {
+            const selectedType = filterSelect.value;
+            const totalCount = tableRows.length;
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const typeText = row.cells[2].querySelector('.badge').textContent.trim();
+                let adType = '';
+                if (typeText === '文字') adType = 'text';
+                else if (typeText === '图片') adType = 'image';
+                else if (typeText === '视频') adType = 'video';
+
+                if (selectedType === 'all' || adType === selectedType) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            updateCount(visibleCount, totalCount);
+        }
+
+        filterSelect.addEventListener('change', filterAds);
+
+        const totalCount = tableRows.length;
+        let initialCount = 0;
+        tableRows.forEach(() => initialCount++);
+        updateCount(initialCount, totalCount);
+
+        // 自动消失提示（原有功能）
         const successAlert = document.querySelector('.alert-success');
         if (successAlert) {
-            // 3秒后自动淡出
             setTimeout(function() {
-                // Bootstrap 5的淡出效果
                 successAlert.classList.add('fade');
                 successAlert.style.opacity = '0';
-
-                // 500ms后移除元素
                 setTimeout(function() {
                     successAlert.remove();
                 }, 500);
-            }, 3000); // 3000ms = 3秒
+            }, 3000);
         }
     });
 </script>
