@@ -34,6 +34,7 @@ public class LoginCheckFilter implements Filter {
             return;
         }
 
+
         if (requestURI.endsWith("/index.jsp") || requestURI.endsWith("/shop/")) {
             HttpSession session = httpRequest.getSession(false);
             if (session == null || session.getAttribute("isLoggedIn") == null ||

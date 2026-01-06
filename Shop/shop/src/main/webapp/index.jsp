@@ -290,7 +290,7 @@
                 <a href="userInfo.jsp" class="nav-link">个人中心</a>
                 <a href="cart" class="nav-link">购物车</a>  <!-- ✅ 已修复：cart -->
                 <a href="order" class="nav-link">我的订单</a>  <!-- ✅ 已修复：order -->
-                <a href="#" class="nav-link">收藏夹</a>
+                <a href="favorite" class="nav-link">收藏夹</a>
             </div>
 
             <div class="user-info">

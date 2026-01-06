@@ -1,15 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
-<%-- 1. 登录检查（使用 JSTL 替代 Java 代码）--%>
+<%-- 登录检查 --%>
 <c:if test="${empty sessionScope.isLoggedIn or not sessionScope.isLoggedIn}">
     <c:redirect url="/login" />
 </c:if>
 
-<%-- 2. 获取分类参数和名称映射（使用 JSTL 替代 Java 代码）--%>
+<%-- 获取分类参数和名称映射 --%>
 <c:set var="category" value="${empty param.category ? 'electronics' : param.category}" />
-
 <c:choose>
     <c:when test="${category == 'electronics'}"><c:set var="categoryName" value="电子产品" /></c:when>
     <c:when test="${category == 'clothing'}"><c:set var="categoryName" value="服装鞋帽" /></c:when>
@@ -20,11 +19,11 @@
     <c:otherwise><c:set var="categoryName" value="未知分类" /></c:otherwise>
 </c:choose>
 
-<%-- 3. 获取商品数据（使用 JSTL 替代 Java 代码）--%>
+<%-- 获取商品数据 --%>
 <jsp:useBean id="productDAO" class="com.example.shop.ProductDAO" scope="page" />
 <c:set var="products" value="${productDAO.getProductsByCategory(category)}" />
 
-<%-- 4. 计算统计数据（使用 JSTL 替代 Java 代码）--%>
+<%-- 计算统计数据 --%>
 <c:set var="totalSales" value="0" />
 <c:set var="totalRating" value="0" />
 <c:forEach var="product" items="${products}">
@@ -142,7 +141,7 @@
                 <a href="userInfo.jsp" class="nav-link">个人中心</a>
                 <a href="cart" class="nav-link">购物车</a>
                 <a href="order" class="nav-link">我的订单</a>
-                <a href="#" class="nav-link">收藏夹</a>
+                <a href="favorite" class="nav-link">收藏夹</a>
             </div>
 
             <div class="user-info">
@@ -257,7 +256,6 @@
 
                                 <div class="product-rating">
                                     <div class="rating-stars">
-                                            <%-- 5. 评分星星（使用JSTL代替Java代码）--%>
                                         <c:forEach begin="1" end="5" var="i">
                                             <c:choose>
                                                 <c:when test="${product.rating >= i}">★</c:when>
@@ -275,7 +273,6 @@
                                 <div class="stock-info">
                                     <span>库存</span>
                                     <div class="stock-bar">
-                                            <%-- 6. 库存进度条（使用EL表达式代替Java代码）--%>
                                         <div class="stock-fill" style="width: ${product.stock > 100 ? 100 : product.stock}%"></div>
                                     </div>
                                     <span>${product.stock}件</span>
@@ -326,7 +323,7 @@
 </main>
 
 <script>
-    // ==================== 全局定义 ====================
+    // ==================== 全局定义（修正URL，移除空格） ====================
     var AD_API_HOST = 'http://10.100.164.17:8080/ad-platform';
     var AD_SITE_ID = 'shopping';
 
@@ -419,20 +416,36 @@
         form.submit();
     }
 
-    // 收藏商品
-    function toggleFavorite(productId, button) {
-        if (button.textContent === '♡') {
-            button.textContent = '♥'; button.style.color = '#ff6b6b';
-            alert('已添加到收藏夹！');
-        } else {
-            button.textContent = '♡'; button.style.color = '#333';
-            alert('已从收藏夹移除！');
-        }
-    }
 
+    function toggleFavorite(productId, button) {
+        console.log('>>> 进入收藏函数', productId, button.textContent);
+        const add = button.textContent === '♡';
+        console.log('>>> add=', add);
+
+        fetch('favorite', {
+            method: 'POST',
+            headers: {'Content-Type':'application/x-www-form-urlencoded'},
+            body: 'action=' + (add ? 'add' : 'remove') + '&productId=' + productId
+        })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    button.textContent = add ? '♥' : '♡';
+                    button.style.color   = add ? '#ff6b6b' : '#333';
+                } else {
+                    /* ① 看完整返回 */
+                    alert('失败原因：' + (json.msg || '未知错误'));
+                    console.error(json);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('网络错误');
+            });
+    }
     // ==================== 广告加载区 ====================
     (function() {
-        console.log('🎯 广告加载模块已加载');
+        console.log('🎯 广告加载模块已启动');
 
         function waitForReady(callback) {
             let attempts = 0;
@@ -482,6 +495,7 @@
                     .then(data => {
                         console.log('✅ [' + containerId + '] API返回:', data);
                         if (data && data.success === true && data.ad) {
+                            console.log('🎯 [' + containerId + '] 广告对象:', data.ad);
                             container.innerHTML = '';
                             AdPlatformSDK.renderAd(containerId, data.ad);
                             console.log('✅ [' + containerId + '] 渲染成功！');
