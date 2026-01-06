@@ -1,0 +1,115 @@
+# Video Platform（视频播放与广告展示平台）
+
+## 项目简介
+
+本项目是一个基于 **Java Servlet + JSP** 的视频播放平台示例系统，支持用户注册登录、视频上传与浏览、视频播放日志记录，并在视频播放前 **接入广告平台进行广告展示与曝光 / 点击上报**。
+
+系统采用典型的 **MVC 分层架构**，前后端通过 JSP + JavaScript 实现协作，适合作为 Java Web 课程设计或 Servlet/JSP 实训项目。
+
+---
+
+## 功能模块
+
+### 用户模块
+- 用户注册
+- 用户登录 / 登出
+- 登录状态校验（Filter）
+
+### 视频模块
+- 视频上传
+- 视频列表展示
+- 视频详情页播放
+- 视频分类管理
+
+### 播放日志模块
+- 视频播放开始 / 结束日志记录
+- 广告播放开始 / 结束日志记录
+
+### 广告播放与追踪（核心功能）
+- 视频播放前向广告平台请求广告
+- 支持视频广告 / 图片广告
+- 广告倒计时与跳过控制
+- 广告曝光上报（Impression）
+- 广告点击上报（Click）
+
+---
+
+## 技术栈
+
+### 后端
+- Java 8+
+- Servlet
+- JSP
+- JDBC
+- Maven
+
+### 前端
+- JSP
+- JavaScript（原生）
+- HTML / CSS
+
+### 数据库
+- MySQL（JDBC 连接）
+
+---
+
+## 项目结构
+
+```
+src/main
+├─ java/com/example/video_platform
+│  ├─ controller
+│  ├─ service
+│  │  └─ impl
+│  ├─ dao
+│  │  └─ impl
+│  ├─ model
+│  ├─ filter
+│  └─ util
+│
+├─ webapp
+│  ├─ assets
+│  │  ├─ css
+│  │  └─ js
+│  │      └─ video-player.js
+│  ├─ jsp
+│  │  ├─ index.jsp
+│  │  ├─ login.jsp
+│  │  ├─ register.jsp
+│  │  ├─ upload.jsp
+│  │  ├─ videos.jsp
+│  │  └─ video.jsp
+│  └─ WEB-INF
+│     └─ web.xml
+```
+
+---
+
+## 运行环境
+
+- JDK 8+
+- Maven 3.x
+- Tomcat 8 / 9
+- MySQL 5.7+
+
+---
+
+## 部署与运行
+
+1. 创建数据库并配置表结构  
+2. 修改 `DBUtil.java` 中数据库连接信息  
+3. 构建项目：
+   ```bash
+   mvn clean package
+   ```
+4. 部署生成的 `video_platform-1.0-SNAPSHOT.war` 到 Tomcat  
+5. 访问：
+   ```
+   http://localhost:8080/video_platform/
+   ```
+
+---
+
+## 说明
+
+本项目为教学与实验用途示例项目。
