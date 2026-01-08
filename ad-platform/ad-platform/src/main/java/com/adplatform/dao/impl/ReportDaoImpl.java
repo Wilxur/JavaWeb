@@ -22,32 +22,52 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public List<ReportData> getAdStats(int advertiserId, ReportFilter filter) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DATE(i.shown_at) AS `date`, ")
-                .append("COUNT(i.id) AS impressions, ")
-                .append("COUNT(c.id) AS clicks, ")
-                .append("ROUND(COUNT(c.id) * 100.0 / COUNT(i.id), 2) AS ctr ")
-                .append("FROM ad_impressions i ")
-                .append("INNER JOIN ads a ON i.ad_id = a.id ")
-                .append("LEFT JOIN ad_clicks c ON i.ad_id = c.ad_id AND i.uid = c.uid AND DATE(i.shown_at) = DATE(c.clicked_at) ")
-                .append("WHERE a.advertiser_id = ? ");
+        sql.append("SELECT base.date, ")
+                .append("base.impressions, ")
+                .append("COALESCE(clicks.clicks, 0) AS clicks, ")
+                .append("ROUND(COALESCE(clicks.clicks, 0) * 100.0 / base.impressions, 2) AS ctr ")
+                .append("FROM (")
+                .append("  SELECT DATE(i.shown_at) AS `date`, COUNT(DISTINCT i.id) AS impressions ")
+                .append("  FROM ad_impressions i ")
+                .append("  INNER JOIN ads a ON i.ad_id = a.id ")
+                .append("  WHERE a.advertiser_id = ? ");
 
         List<Object> params = new ArrayList<>();
         params.add(advertiserId);
 
-        // 检查并添加开始日期（非空字符串）
+        // 添加日期条件（内层查询）
         if (filter.getStartDate() != null && !filter.getStartDate().trim().isEmpty()) {
-            sql.append("AND DATE(i.shown_at) >= ? ");
+            sql.append("    AND DATE(i.shown_at) >= ? ");
             params.add(filter.getStartDate());
         }
-
-        // 检查并添加结束日期（非空字符串）
         if (filter.getEndDate() != null && !filter.getEndDate().trim().isEmpty()) {
-            sql.append("AND DATE(i.shown_at) <= ? ");
+            sql.append("    AND DATE(i.shown_at) <= ? ");
             params.add(filter.getEndDate());
         }
 
-        sql.append("GROUP BY DATE(i.shown_at) ")
-                .append("ORDER BY `date` DESC");
+        sql.append("  GROUP BY DATE(i.shown_at)")
+                .append(") base ")
+                .append("LEFT JOIN (")
+                .append("  SELECT DATE(c.clicked_at) AS `date`, COUNT(*) AS clicks ")
+                .append("  FROM ad_clicks c ")
+                .append("  INNER JOIN ads a ON c.ad_id = a.id ")
+                .append("  WHERE a.advertiser_id = ? ");
+
+        params.add(advertiserId); // 第二次添加
+
+        // 为点击表添加相同的日期条件
+        if (filter.getStartDate() != null && !filter.getStartDate().trim().isEmpty()) {
+            sql.append("    AND DATE(c.clicked_at) >= ? ");
+            params.add(filter.getStartDate());
+        }
+        if (filter.getEndDate() != null && !filter.getEndDate().trim().isEmpty()) {
+            sql.append("    AND DATE(c.clicked_at) <= ? ");
+            params.add(filter.getEndDate());
+        }
+
+        sql.append("  GROUP BY DATE(c.clicked_at)")
+                .append(") clicks ON base.date = clicks.date ")
+                .append("ORDER BY base.date DESC");
 
         return DBUtil.executeQuery(sql.toString(), ROW_MAPPER, params.toArray());
     }
