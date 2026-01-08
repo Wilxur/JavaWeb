@@ -109,7 +109,7 @@ http://localhost:8080/shop/index.jsp
 
 > 启动项目后，**访问首页**示例：
 > ```
-> http://localhost:8080/shop/index.jsp
+> http://10.100.164.18:8080/shop/login
 > ```
 > 点击右上角「登录」→ 输入账号 `admin` / 密码 `123456` 即可体验完整流程。
 
